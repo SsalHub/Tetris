@@ -28,7 +28,7 @@ typedef struct block {
 	TYPE blockType;
 	POINT blockPoint[4]; // 배열의 첫 요소가 기준점.
 	int rotation, rotationCycle;	// 회전 횟수, 반복 주기.
-	short nFrame = 0;	// 떨어지는 속도.
+	short nFrame;	// 떨어지는 속도.
 } BLOCK;
 
 void setMap(int map[][WIDTH]);
@@ -66,56 +66,56 @@ int main() {
 		/* 키보드 입력받는 부분 */
 		if (_kbhit()) {
 			switch (_getch()) {
-				case KEY_SPACE :		// 스페이스바 
-					deltaY = getDeltaY(map, &a);
+			case KEY_SPACE :		// 스페이스바 
+				deltaY = getDeltaY(map, &a);
+				removeBlock(map, &a);
+				for (int i = 0; i < BLOCK_SIZE; i++) {
+					a.blockPoint[i].y += deltaY;
+				}
+				putBlock(map, &a);
+				break;
+			case ARROW_KEY_DEFAULT :		// 방향키
+				switch (_getch()) {
+				case KEY_DOWN:		// 아래 방향키
 					removeBlock(map, &a);
 					for (int i = 0; i < BLOCK_SIZE; i++) {
-						a.blockPoint[i].y += deltaY;
+						a.blockPoint[i].y++;
+						a.nFrame = FRAME_PER_SEC;
 					}
 					putBlock(map, &a);
 					break;
-				case ARROW_KEY_DEFAULT :		// 방향키
-					switch (_getch()) {
-						case KEY_DOWN:		// 아래 방향키
-							removeBlock(map, &a);
+				case KEY_LEFT :		// 왼쪽 방향키
+					removeBlock(map, &a);
+					for (int i = 0; i < BLOCK_SIZE; i++) {
+						if (a.blockPoint[i].x - 1 <= 0)
+							break;
+						else if (i == BLOCK_SIZE - 1) {
 							for (int i = 0; i < BLOCK_SIZE; i++) {
-								a.blockPoint[i].y++;
-								a.nFrame = FRAME_PER_SEC;
+								a.blockPoint[i].x--;
 							}
-							putBlock(map, &a);
-							break;
-						case KEY_LEFT :		// 왼쪽 방향키
-							removeBlock(map, &a);
-							for (int i = 0; i < BLOCK_SIZE; i++) {
-								if (a.blockPoint[i].x - 1 <= 0)
-									break;
-								else if (i == BLOCK_SIZE - 1) {
-									for (int i = 0; i < BLOCK_SIZE; i++) {
-										a.blockPoint[i].x--;
-									}
-								}
-							}
-							putBlock(map, &a);
-							break;
-						case KEY_RIGHT :		// 오른쪽 방향키
-							removeBlock(map, &a);
-							for (int i = 0; i < BLOCK_SIZE; i++) {
-								if (WIDTH - 1 <= a.blockPoint[i].x + 1)
-									break;
-								else if (i == BLOCK_SIZE - 1) {
-									for (int i = 0; i < BLOCK_SIZE; i++) {
-										a.blockPoint[i].x++;
-									}
-								}
-							}
-							putBlock(map, &a);
-							break;
-						case KEY_UP:		// 위 방향키 (회전)
-							removeBlock(map, &a);
-							rotateBlock(map, &a);
-							putBlock(map, &a);
-							break;
+						}
 					}
+					putBlock(map, &a);
+					break;
+				case KEY_RIGHT :		// 오른쪽 방향키
+					removeBlock(map, &a);
+					for (int i = 0; i < BLOCK_SIZE; i++) {
+						if (WIDTH - 1 <= a.blockPoint[i].x + 1)
+							break;
+						else if (i == BLOCK_SIZE - 1) {
+							for (int i = 0; i < BLOCK_SIZE; i++) {
+								a.blockPoint[i].x++;
+							}
+						}
+					}
+					putBlock(map, &a);
+					break;
+				case KEY_UP :		// 위 방향키 (회전)
+					removeBlock(map, &a);
+					rotateBlock(map, &a);
+					putBlock(map, &a);
+					break;
+				}
 			}
 		}
 		/* 키보드 입력받는 부분 끝*/
@@ -161,6 +161,7 @@ void printMap(const int map[][WIDTH]) {
 void setBlock(BLOCK* p) {		// 블럭 의 속성값 초기화.
 	POINT* point = p->blockPoint;
 	setPoint(point, 2 * 3, -1);	// 블럭의 기준점을 (2 * 3, -1)으로 초기화
+	p->nFrame = 0;
 
 	//p->blockType = (TYPE)(rand() % 7);
 	p->blockType = O;		// 임시로 O형 블록만 선택함.		아래 switch문 완성시 윗 라인의 주석 코드로 교체
@@ -254,7 +255,7 @@ void removeBlockPrev(const int map[][WIDTH], BLOCK* pBlock) {
 }
 
 void gotoxy(int x, int y) {		// 커서를 해당 좌표로 이동
-	COORD Cur = { x, y };
+	COORD Cur = { (short)x, (short)y };
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), Cur);
 }
 
