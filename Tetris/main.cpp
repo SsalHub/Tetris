@@ -54,7 +54,7 @@ int main() {
 	gotoxy(5, 27);
 	printf("block.nFrame = ");
 
-	while (block.blockPoint[0].y < HEIGHT - 2) {		// ºí·ÏÀÌ ¸Ê ¹Ù´Ú±îÁö ¶³¾îÁú ¶§±îÁö ¹Ýº¹
+	while (getDeltaY(map, &block)) {		// ºí·ÏÀÌ ¸Ê ¹Ù´Ú±îÁö ¶³¾îÁú ¶§±îÁö ¹Ýº¹
 		gotoxy(16, 27);
 		printf("%03d", block.nFrame);
 
