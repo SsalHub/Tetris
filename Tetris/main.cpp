@@ -33,6 +33,7 @@ void setBlock(BLOCK* pBlock);
 void setPoint(POINT* pPoint, int x, int y);
 void removeBlock(const int map[][WIDTH], BLOCK* pBlock);
 void dropBlock(const int map[][WIDTH], BLOCK* pBlock);
+void rotate(const int map[][WIDTH], BLOCK* pBlock, int rotatedir);
 void rotateBlock(const int map[][WIDTH], BLOCK* pBlock);
 void putBlock(const int map[][WIDTH], BLOCK* pBlock);
 void putBlockPrev(const int map[][WIDTH], BLOCK* pBlock);
@@ -54,7 +55,7 @@ int main() {
 	gotoxy(5, 27);
 	printf("block.nFrame = ");
 
-	while (block.blockPoint[0].y < HEIGHT - 2) {		// 블록이 맵 바닥까지 떨어질 때까지 반복
+	while (getDeltaY(map, &block)) {		// 블록이 맵 바닥까지 떨어질 때까지 반복
 		gotoxy(16, 27);
 		printf("%03d", block.nFrame);
 
@@ -159,8 +160,8 @@ void setBlock(BLOCK* pBlock) {		// 블럭 의 속성값 초기화.
 	POINT* point = pBlock->blockPoint;
 	setPoint(point, 2 * 3, -1);	// 블럭의 기준점을 (2 * 3, -1)으로 초기화
 
-	//pBlock->blockType = (TYPE)(rand() % 7);
-	pBlock->blockType = BLOCK_O;		// 임시로 O형 블록만 선택함.		아래 switch문 완성시 윗 라인의 주석 코드로 교체
+	pBlock->blockType = (TYPE)(rand() % 7);
+	
 
 	switch (pBlock->blockType) {
 	case BLOCK_O:
@@ -168,12 +169,36 @@ void setBlock(BLOCK* pBlock) {		// 블럭 의 속성값 초기화.
 		setPoint(&point[2], point->x - 1, point->y - 1);
 		setPoint(&point[3], point->x, point->y - 1);
 		break;
-	case BLOCK_I:;
-	case BLOCK_Z:;
-	case BLOCK_S:;
-	case BLOCK_J:;
-	case BLOCK_L:;
-	case BLOCK_T:;
+	case BLOCK_I:
+		setPoint(&point[1], point->x + 1, point->y);
+		setPoint(&point[2], point->x - 1, point->y);
+		setPoint(&point[3], point->x - 2, point->y);
+		break;
+	case BLOCK_Z:
+		setPoint(&point[1], point->x, point->y + 1);
+		setPoint(&point[2], point->x - 1, point->y);
+		setPoint(&point[3], point->x - 1, point->y - 1);
+		break;
+	case BLOCK_S:
+		setPoint(&point[1], point->x - 1, point->y + 1);
+		setPoint(&point[2], point->x - 1, point->y);
+		setPoint(&point[3], point->x, point->y - 1);
+		break;
+	case BLOCK_J:
+		setPoint(&point[1], point->x - 1, point->y);
+		setPoint(&point[2], point->x - 2, point->y);
+		setPoint(&point[3], point->x, point->y - 1);
+		break;
+	case BLOCK_L:
+		setPoint(&point[1], point->x, point->y + 1);
+		setPoint(&point[2], point->x - 1, point->y);
+		setPoint(&point[3], point->x - 2, point->y);
+		break;
+	case BLOCK_T:
+		setPoint(&point[1], point->x, point->y + 1);
+		setPoint(&point[2], point->x - 1, point->y);
+		setPoint(&point[3], point->x, point->y - 1);
+		break;
 	}
 
 	switch (pBlock->blockType) {
@@ -186,8 +211,7 @@ void setBlock(BLOCK* pBlock) {		// 블럭 의 속성값 초기화.
 	case BLOCK_T: pBlock->rotationCycle = 4;
 	}
 
-	//pBlock->rotation = rand() % pBlock->rotationCycle;
-	pBlock->rotation = 1;
+	pBlock->rotation = 0;
 }
 
 void setPoint(POINT* pPoint, int x, int y) {
@@ -213,25 +237,34 @@ void dropBlock(const int map[][WIDTH], BLOCK* pBlock) { // 블럭의 모든 point의 y
 	putBlock(map, pBlock);
 }
 
-void rotateBlock(const int map[][WIDTH], BLOCK* pBlock) { // 기준점 중심으로 반시계 방향으로 90도 회전.
-	if (pBlock->rotation < pBlock->rotationCycle) {
-		POINT* point = pBlock->blockPoint;
+void rotate(const int map[][WIDTH], BLOCK* pBlock, int rotatedir) {
+	POINT* point = pBlock->blockPoint;
 
-		/*if (pBlock->blockType == 'O') {
-			return;
-		}*/
+	if (rotatedir > 2) { // 3회 회전 = 반대 방향으로 1회 회전, 4회 회전 = 0회 회전.
+		rotatedir -= 4;
+	}
 
-		for (int i = 0; i < BLOCK_SIZE; i++) {
-			int delta_x = point[i].x - point[0].x;
-			int delta_y = point[i].y - point[0].y;
-			setPoint(&point[i], point[0].x - delta_y, point[0].y + delta_x);
-		}
+	if (!rotatedir) { // 0회 회전이면 리턴.
+		return;
+	}
 
+	// rotatedir이 1이면 양의 방향으로 90도 회전, -1이면 음의 방향으로 90도 회전.
+	for (int i = 0; i < BLOCK_SIZE; i++) {
+		int delta_x = point[i].x - point[0].x;
+		int delta_y = point[i].y - point[0].y;
+		setPoint(&point[i], point[0].x - rotatedir * delta_y, point[0].y + rotatedir * delta_x);
+	}
+}
+
+void rotateBlock(const int map[][WIDTH], BLOCK* pBlock) {
+	if (pBlock->rotation < pBlock->rotationCycle - 1) {
+		rotate(map, pBlock, 1); // 1회 회전.
 		(pBlock->rotation)++;
 		// pBlock->rotation %= pBlock->rotationCycle;
 	}
-	else {
-		pBlock->rotation = 1;
+	else { // 현재 cycle - 1회 회전된 상태이므로 5 - cycle회 회전하면 원 상태로 돌아간다.
+		rotate(map, pBlock, 5 - pBlock->rotationCycle);
+		pBlock->rotation = 0;
 	}
 }
 
