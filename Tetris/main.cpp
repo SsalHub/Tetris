@@ -241,30 +241,21 @@ void dropBlock(const int map[][WIDTH], BLOCK* pBlock) { // 블럭의 모든 point의 y
 }
 
 void rotateBlock(const int map[][WIDTH], BLOCK* pBlock) { // 기준점 중심으로 반시계 방향으로 90도 회전.
+	if (pBlock->rotationCycle == 1) return;	// BLOCK_O일 때엔 즉시 리턴
+
 	int delta_x = 0;
 	int delta_y = 0;
-	int rotatedir = 0;
+	int rotatedir = 0;	// 블럭을 초기 상태로 되돌리기까지 필요한 회전 횟수
 
 	if (pBlock->rotationCycle == pBlock->rotation) {		// 회전 횟수가 최대일 때
-		switch (pBlock->rotationCycle) {		// 블록을 원래 회전 상태로 돌리기까지 필요한 회전 횟수 설정
-			/* 2번 돌리는 블럭은 음의 방향으로, 4번 돌리는 블럭은 양의 방향으로 각각 1번씩 돌리면 됨 */
-			case 1:
-				rotatedir = 0;		// 회전을 하지 않음
-				break;
-			case 2:	
-				rotatedir = -1;		// 음의 방향으로 한 번 회전
-				break;
-			case 4:
-				rotatedir = 1;		// 양의 방향으로 한 번 회전
-		}
-		if (rotatedir) {		// rotatedir이 0이 아닐 경우 (BLOCK_O가 아닐 경우)
-			for (int i = 0; i < BLOCK_SIZE; i++) {
-				delta_x = pBlock->blockPoint[i].x - pBlock->blockPoint[0].x;
-				delta_y = pBlock->blockPoint[i].y - pBlock->blockPoint[0].y;
-				setPoint(&pBlock->blockPoint[i], pBlock->blockPoint[0].x - delta_y * rotatedir, pBlock->blockPoint[0].y + delta_x * rotatedir);
+		rotatedir = (2 < pBlock->rotationCycle ? 1 : -1);		// 2번 돌리는 블럭은 1, 4번 돌리는 블럭은 -1
+
+		for (int i = 0; i < BLOCK_SIZE; i++) {
+			delta_x = pBlock->blockPoint[i].x - pBlock->blockPoint[0].x;
+			delta_y = pBlock->blockPoint[i].y - pBlock->blockPoint[0].y;
+			setPoint(&pBlock->blockPoint[i], pBlock->blockPoint[0].x - delta_y * rotatedir, pBlock->blockPoint[0].y + delta_x * rotatedir);
 			}
-			pBlock->rotation = 1;
-		}
+		pBlock->rotation = 1;
 	}
 	else {	
 		for (int i = 0; i < BLOCK_SIZE; i++) {
