@@ -33,7 +33,6 @@ void setBlock(BLOCK* pBlock);
 void setPoint(POINT* pPoint, int x, int y);
 void removeBlock(const int map[][WIDTH], BLOCK* pBlock);
 void dropBlock(const int map[][WIDTH], BLOCK* pBlock);
-void rotate(const int map[][WIDTH], BLOCK* pBlock, int rotatedir);
 void rotateBlock(const int map[][WIDTH], BLOCK* pBlock);
 void putBlock(const int map[][WIDTH], BLOCK* pBlock);
 void putBlockPrev(const int map[][WIDTH], BLOCK* pBlock);
@@ -52,11 +51,13 @@ int main() {
 
 	BLOCK block;
 	setBlock(&block);
-	gotoxy(5, 27);
-	printf("block.nFrame = ");
+	gotoxy(2, 27);
+	printf("block.nFrame = "); 
+	gotoxy(30, 2);
+	printf("block.rotation : %d", block.rotation);
 
 	while (getDeltaY(map, &block)) {		// 블록이 맵 바닥까지 떨어질 때까지 반복
-		gotoxy(16, 27);
+		gotoxy(17, 27);
 		printf("%03d", block.nFrame);
 
 
@@ -112,6 +113,8 @@ int main() {
 							removeBlock(map, &block);
 							rotateBlock(map, &block);
 							putBlock(map, &block);
+							gotoxy(30, 2);
+							printf("block.rotation : %d", block.rotation);
 							break;
 					}
 			}
@@ -121,7 +124,7 @@ int main() {
 
 		if (block.nFrame <= 0) {
 			dropBlock(map, &block);
-			gotoxy(16, 27);
+			gotoxy(17, 27);
 			block.nFrame = FRAME_PER_SEC;
 			printf("%03d", block.nFrame);
 		}
@@ -211,7 +214,7 @@ void setBlock(BLOCK* pBlock) {		// 블럭 의 속성값 초기화.
 	case BLOCK_T: pBlock->rotationCycle = 4;
 	}
 
-	pBlock->rotation = 0;
+	pBlock->rotation = 1;
 }
 
 void setPoint(POINT* pPoint, int x, int y) {
@@ -237,34 +240,39 @@ void dropBlock(const int map[][WIDTH], BLOCK* pBlock) { // 블럭의 모든 point의 y
 	putBlock(map, pBlock);
 }
 
-void rotate(const int map[][WIDTH], BLOCK* pBlock, int rotatedir) {
-	POINT* point = pBlock->blockPoint;
+void rotateBlock(const int map[][WIDTH], BLOCK* pBlock) { // 기준점 중심으로 반시계 방향으로 90도 회전.
+	int delta_x = 0;
+	int delta_y = 0;
+	int rotatedir = 0;
 
-	if (rotatedir > 2) { // 3회 회전 = 반대 방향으로 1회 회전, 4회 회전 = 0회 회전.
-		rotatedir -= 4;
+	if (pBlock->rotationCycle == pBlock->rotation) {		// 회전 횟수가 최대일 때
+		switch (pBlock->rotationCycle) {		// 블록을 원래 회전 상태로 돌리기까지 필요한 회전 횟수 설정
+			/* 2번 돌리는 블럭은 음의 방향으로, 4번 돌리는 블럭은 양의 방향으로 각각 1번씩 돌리면 됨 */
+			case 1:
+				rotatedir = 0;		// 회전을 하지 않음
+				break;
+			case 2:	
+				rotatedir = -1;		// 음의 방향으로 한 번 회전
+				break;
+			case 4:
+				rotatedir = 1;		// 양의 방향으로 한 번 회전
+		}
+		if (rotatedir) {		// rotatedir이 0이 아닐 경우 (BLOCK_O가 아닐 경우)
+			for (int i = 0; i < BLOCK_SIZE; i++) {
+				delta_x = pBlock->blockPoint[i].x - pBlock->blockPoint[0].x;
+				delta_y = pBlock->blockPoint[i].y - pBlock->blockPoint[0].y;
+				setPoint(&pBlock->blockPoint[i], pBlock->blockPoint[0].x - delta_y * rotatedir, pBlock->blockPoint[0].y + delta_x * rotatedir);
+			}
+			pBlock->rotation = 1;
+		}
 	}
-
-	if (!rotatedir) { // 0회 회전이면 리턴.
-		return;
-	}
-
-	// rotatedir이 1이면 양의 방향으로 90도 회전, -1이면 음의 방향으로 90도 회전.
-	for (int i = 0; i < BLOCK_SIZE; i++) {
-		int delta_x = point[i].x - point[0].x;
-		int delta_y = point[i].y - point[0].y;
-		setPoint(&point[i], point[0].x - rotatedir * delta_y, point[0].y + rotatedir * delta_x);
-	}
-}
-
-void rotateBlock(const int map[][WIDTH], BLOCK* pBlock) {
-	if (pBlock->rotation < pBlock->rotationCycle - 1) {
-		rotate(map, pBlock, 1); // 1회 회전.
-		(pBlock->rotation)++;
-		// pBlock->rotation %= pBlock->rotationCycle;
-	}
-	else { // 현재 cycle - 1회 회전된 상태이므로 5 - cycle회 회전하면 원 상태로 돌아간다.
-		rotate(map, pBlock, 5 - pBlock->rotationCycle);
-		pBlock->rotation = 0;
+	else {	
+		for (int i = 0; i < BLOCK_SIZE; i++) {
+			delta_x = pBlock->blockPoint[i].x - pBlock -> blockPoint[0].x;
+			delta_y = pBlock->blockPoint[i].y - pBlock -> blockPoint[0].y;
+			setPoint(&pBlock->blockPoint[i], pBlock -> blockPoint[0].x - delta_y, pBlock->blockPoint[0].y + delta_x);
+		}
+		pBlock->rotation++;
 	}
 }
 
