@@ -1,0 +1,48 @@
+#pragma once		// 헤더 파일끼리 꼬이지 않도록, 매크로 정의한 후 #ifndef로 중복 검사	-> VS에서만 작동하는 코드
+#ifndef _HEADER_TETRIS		// 이미 매크로 정의되어 있는가?
+#define _HEADER_TETRIS		// 정의되어 있지 않다면 새로 정의함
+/* 참고 링크 : https://pang2h.tistory.com/129 */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <conio.h>
+#include <Windows.h>
+
+#define WIDTH 12					// 맵의 너비
+#define HEIGHT 27					// 맵의 높이
+#define BLOCK_SIZE 4				// 블록 하나에 포함되는 작은 블록의 갯수(모두 4개)
+#define FRAME_PER_SEC 240		// 테트리스의 fps. 초당 240회의 연산을 하도록 고정 (고정 안할 시 초당 n천회 이상)
+#define ARROW_KEY_DEFAULT 224		// 방향키를 입력받을 때, 방향키의 ASCII값에 앞서 입력되는 ASCII값
+#define KEY_LEFT 75
+#define KEY_RIGHT 77
+#define KEY_UP 72
+#define KEY_DOWN 80
+#define KEY_SPACE 32
+
+#define GET_MIN(n1, n2) ((n1) < (n2) ? (n1) : (n2))		// 더 작은 수를 리턴하는 매크로 함수
+
+typedef enum type { BLOCK_I, BLOCK_O, BLOCK_Z, BLOCK_S, BLOCK_J, BLOCK_L, BLOCK_T } TYPE; // 블럭의 종류(7가지)를 열거형으로 정의.
+typedef enum direction { DIR_LEFT, DIR_RIGHT, DIR_DOWN } DIRECTION;
+
+typedef struct block {
+	TYPE blockType;
+	POINT blockPoint[4]; // 배열의 첫 요소가 기준점.
+	int rotation, rotationCycle;	// 회전 횟수, 반복 주기.
+	short nFrame = 0;	// 떨어지는 속도.
+} BLOCK;
+
+void setMap(int map[][WIDTH]);
+void printMap(const int map[][WIDTH]);
+void setBlock(BLOCK* pBlock);
+void setPoint(POINT* pPoint, int x, int y);
+void removeBlock(const int map[][WIDTH], BLOCK* pBlock);
+void dropBlock(const int map[][WIDTH], BLOCK* pBlock);
+void rotateBlock(const int map[][WIDTH], BLOCK* pBlock);
+void putBlock(const int map[][WIDTH], BLOCK* pBlock);
+void putBlockPrev(const int map[][WIDTH], BLOCK* pBlock);
+void removeBlockPrev(const int map[][WIDTH], BLOCK* pBlock);
+void gotoxy(int x, int y);
+int getDeltaY(const int map[][WIDTH], BLOCK* pBlock);
+
+#endif		// #ifndef문 종료
