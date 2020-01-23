@@ -1,43 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <conio.h>
-#include <Windows.h>
-
-#define WIDTH 12					// 맵의 너비
-#define HEIGHT 27					// 맵의 높이
-#define BLOCK_SIZE 4				// 블록 하나에 포함되는 작은 블록의 갯수(모두 4개)
-#define FRAME_PER_SEC 240		// 테트리스의 fps. 초당 240회의 연산을 하도록 고정 (고정 안할 시 초당 n천회 이상)
-#define ARROW_KEY_DEFAULT 224		// 방향키를 입력받을 때, 방향키의 ASCII값에 앞서 입력되는 ASCII값
-#define KEY_LEFT 75
-#define KEY_RIGHT 77
-#define KEY_UP 72
-#define KEY_DOWN 80
-#define KEY_SPACE 32
-
-#define GET_MIN(n1, n2) ((n1) < (n2) ? (n1) : (n2))		// 더 작은 수를 리턴하는 매크로 함수
-
-typedef enum type { BLOCK_I, BLOCK_O, BLOCK_Z, BLOCK_S, BLOCK_J, BLOCK_L, BLOCK_T } TYPE; // 블럭의 종류(7가지)를 열거형으로 정의.
-
-typedef struct block {
-	TYPE blockType;
-	POINT blockPoint[4]; // 배열의 첫 요소가 기준점.
-	int rotation, rotationCycle;	// 회전 횟수, 반복 주기.
-	short nFrame = 0;	// 떨어지는 속도.
-} BLOCK;
-
-void setMap(int map[][WIDTH]);
-void printMap(const int map[][WIDTH]);
-void setBlock(BLOCK* pBlock);
-void setPoint(POINT* pPoint, int x, int y);
-void removeBlock(const int map[][WIDTH], BLOCK* pBlock);
-void dropBlock(const int map[][WIDTH], BLOCK* pBlock);
-void rotateBlock(const int map[][WIDTH], BLOCK* pBlock);
-void putBlock(const int map[][WIDTH], BLOCK* pBlock);
-void putBlockPrev(const int map[][WIDTH], BLOCK* pBlock);
-void removeBlockPrev(const int map[][WIDTH], BLOCK* pBlock);
-void gotoxy(int x, int y);
-int getDeltaY(const int map[][WIDTH], BLOCK* pBlock);
+#include "Tetris.h"
 
 int main() {
 	srand((unsigned int)time(NULL));
@@ -61,57 +22,57 @@ int main() {
 		/* 키보드 입력받는 부분 */
 		if (_kbhit()) {
 			switch (_getch()) {
-				case KEY_SPACE :
-					deltaY = getDeltaY(map, &block);
+			case KEY_SPACE:
+				deltaY = getDeltaY(map, &block);
+				removeBlock(map, &block);
+				for (int i = 0; i < BLOCK_SIZE; i++) {
+					block.blockPoint[i].y += deltaY;
+				}
+				putBlock(map, &block);
+				break;
+			case ARROW_KEY_DEFAULT:
+				switch (_getch()) {
+				case KEY_DOWN:
 					removeBlock(map, &block);
 					for (int i = 0; i < BLOCK_SIZE; i++) {
-						block.blockPoint[i].y += deltaY;
+						block.blockPoint[i].y++;
+						block.nFrame = FRAME_PER_SEC;
 					}
 					putBlock(map, &block);
 					break;
-				case ARROW_KEY_DEFAULT :
-					switch (_getch()) {
-						case KEY_DOWN:
-							removeBlock(map, &block);
+				case KEY_LEFT:
+					removeBlock(map, &block);
+					for (int i = 0; i < BLOCK_SIZE; i++) {
+						if (block.blockPoint[i].x - 1 <= 0)
+							break;
+						else if (i == BLOCK_SIZE - 1) {
 							for (int i = 0; i < BLOCK_SIZE; i++) {
-								block.blockPoint[i].y++;
-								block.nFrame = FRAME_PER_SEC;
+								block.blockPoint[i].x--;
 							}
-							putBlock(map, &block);
-							break;
-						case KEY_LEFT :
-							removeBlock(map, &block);
-							for (int i = 0; i < BLOCK_SIZE; i++) {
-								if (block.blockPoint[i].x - 1 <= 0)
-									break;
-								else if (i == BLOCK_SIZE - 1) {
-									for (int i = 0; i < BLOCK_SIZE; i++) {
-										block.blockPoint[i].x--;
-									}
-								}
-							}
-							putBlock(map, &block);
-							break;
-						case KEY_RIGHT : 
-							removeBlock(map, &block);
-							for (int i = 0; i < BLOCK_SIZE; i++) {
-								if (WIDTH - 1 <= block.blockPoint[i].x + 1)
-									break;
-								else if (i == BLOCK_SIZE - 1) {
-									for (int i = 0; i < BLOCK_SIZE; i++) {
-										block.blockPoint[i].x++;
-									}
-
-								}
-							}
-							putBlock(map, &block);
-							break;
-						case KEY_UP:
-							removeBlock(map, &block);
-							rotateBlock(map, &block);
-							putBlock(map, &block);
-							break;
+						}
 					}
+					putBlock(map, &block);
+					break;
+				case KEY_RIGHT:
+					removeBlock(map, &block);
+					for (int i = 0; i < BLOCK_SIZE; i++) {
+						if (WIDTH - 1 <= block.blockPoint[i].x + 1)
+							break;
+						else if (i == BLOCK_SIZE - 1) {
+							for (int i = 0; i < BLOCK_SIZE; i++) {
+								block.blockPoint[i].x++;
+							}
+
+						}
+					}
+					putBlock(map, &block);
+					break;
+				case KEY_UP:
+					removeBlock(map, &block);
+					rotateBlock(map, &block);
+					putBlock(map, &block);
+					break;
+				}
 			}
 		}
 		/* 키보드 입력받는 부분 끝*/
@@ -159,7 +120,7 @@ void setBlock(BLOCK* pBlock) {		// 블럭 의 속성값 초기화.
 	setPoint(point, 2 * 3, -1);	// 블럭의 기준점을 (2 * 3, -1)으로 초기화
 
 	pBlock->blockType = (TYPE)(rand() % 7);
-	
+
 
 	switch (pBlock->blockType) {
 	case BLOCK_O:
@@ -198,18 +159,6 @@ void setBlock(BLOCK* pBlock) {		// 블럭 의 속성값 초기화.
 		setPoint(&point[3], point->x, point->y - 1);
 		break;
 	}
-
-	switch (pBlock->blockType) {
-	case BLOCK_O: pBlock->rotationCycle = 1; break;
-	case BLOCK_I:
-	case BLOCK_Z:
-	case BLOCK_S: pBlock->rotationCycle = 2; break;
-	case BLOCK_J:
-	case BLOCK_L:
-	case BLOCK_T: pBlock->rotationCycle = 4;
-	}
-
-	pBlock->rotation = 0;
 }
 
 void setPoint(POINT* pPoint, int x, int y) {
@@ -236,27 +185,15 @@ void dropBlock(const int map[][WIDTH], BLOCK* pBlock) { // 블럭의 모든 point의 y
 }
 
 void rotateBlock(const int map[][WIDTH], BLOCK* pBlock) {
-	int rotatedir;
+	if (pBlock->blockType == BLOCK_O) {
+		return;
+	}
+
 	POINT* point = pBlock->blockPoint;
-
-	if (pBlock->rotation < pBlock->rotationCycle - 1) {
-		rotatedir = 1;
-		pBlock->rotation++;
-	}
-	else {
-		switch (pBlock->rotationCycle) {
-			case 1: return;
-			case 2: rotatedir = -1; break;
-			case 4: rotatedir = 1;
-		}
-		pBlock->rotation = 0;
-	}
-
-	// rotatedir이 1이면 양의 방향으로 90도 회전, -1이면 음의 방향으로 90도 회전.
 	for (int i = 0; i < BLOCK_SIZE; i++) {
 		int delta_x = point[i].x - point[0].x;
 		int delta_y = point[i].y - point[0].y;
-		setPoint(&point[i], point[0].x - rotatedir * delta_y, point[0].y + rotatedir * delta_x);
+		setPoint(&point[i], point[0].x - delta_y, point[0].y + delta_x);
 	}
 }
 
