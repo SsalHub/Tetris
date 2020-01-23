@@ -18,7 +18,6 @@
 #define GET_MIN(n1, n2) ((n1) < (n2) ? (n1) : (n2))		// 더 작은 수를 리턴하는 매크로 함수
 
 typedef enum type { BLOCK_I, BLOCK_O, BLOCK_Z, BLOCK_S, BLOCK_J, BLOCK_L, BLOCK_T } TYPE; // 블럭의 종류(7가지)를 열거형으로 정의.
-typedef enum direction { DIR_LEFT, DIR_RIGHT, DIR_DOWN } DIRECTION;
 
 typedef struct block {
 	TYPE blockType;
@@ -234,16 +233,6 @@ void dropBlock(const int map[][WIDTH], BLOCK* pBlock) { // 블럭의 모든 point의 y
 		(pBlock->blockPoint[i].y)++;
 	}
 	putBlock(map, pBlock);
-}
-
-void rotate(const int map[][WIDTH], BLOCK* pBlock, int rotatedir) {
-	if (rotatedir > 2) {
-		rotatedir -= 4;
-	}
-
-	if (!rotatedir) { // 0회 회전이면 리턴.
-		return;
-	}
 }
 
 void rotateBlock(const int map[][WIDTH], BLOCK* pBlock) {
