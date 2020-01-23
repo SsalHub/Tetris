@@ -33,7 +33,6 @@ void setBlock(BLOCK* pBlock);
 void setPoint(POINT* pPoint, int x, int y);
 void removeBlock(const int map[][WIDTH], BLOCK* pBlock);
 void dropBlock(const int map[][WIDTH], BLOCK* pBlock);
-void rotate(const int map[][WIDTH], BLOCK* pBlock, int rotatedir);
 void rotateBlock(const int map[][WIDTH], BLOCK* pBlock);
 void putBlock(const int map[][WIDTH], BLOCK* pBlock);
 void putBlockPrev(const int map[][WIDTH], BLOCK* pBlock);
@@ -238,14 +237,30 @@ void dropBlock(const int map[][WIDTH], BLOCK* pBlock) { // 블럭의 모든 point의 y
 }
 
 void rotate(const int map[][WIDTH], BLOCK* pBlock, int rotatedir) {
-	POINT* point = pBlock->blockPoint;
-
-	if (rotatedir > 2) { // 3회 회전 = 반대 방향으로 1회 회전, 4회 회전 = 0회 회전.
+	if (rotatedir > 2) {
 		rotatedir -= 4;
 	}
 
 	if (!rotatedir) { // 0회 회전이면 리턴.
 		return;
+	}
+}
+
+void rotateBlock(const int map[][WIDTH], BLOCK* pBlock) {
+	int rotatedir;
+	POINT* point = pBlock->blockPoint;
+
+	if (pBlock->rotation < pBlock->rotationCycle - 1) {
+		rotatedir = 1;
+		pBlock->rotation++;
+	}
+	else {
+		switch (pBlock->rotationCycle) {
+			case 1: return;
+			case 2: rotatedir = -1; break;
+			case 4: rotatedir = 1;
+		}
+		pBlock->rotation = 0;
 	}
 
 	// rotatedir이 1이면 양의 방향으로 90도 회전, -1이면 음의 방향으로 90도 회전.
@@ -253,18 +268,6 @@ void rotate(const int map[][WIDTH], BLOCK* pBlock, int rotatedir) {
 		int delta_x = point[i].x - point[0].x;
 		int delta_y = point[i].y - point[0].y;
 		setPoint(&point[i], point[0].x - rotatedir * delta_y, point[0].y + rotatedir * delta_x);
-	}
-}
-
-void rotateBlock(const int map[][WIDTH], BLOCK* pBlock) {
-	if (pBlock->rotation < pBlock->rotationCycle - 1) {
-		rotate(map, pBlock, 1); // 1회 회전.
-		(pBlock->rotation)++;
-		// pBlock->rotation %= pBlock->rotationCycle;
-	}
-	else { // 현재 cycle - 1회 회전된 상태이므로 5 - cycle회 회전하면 원 상태로 돌아간다.
-		rotate(map, pBlock, 5 - pBlock->rotationCycle);
-		pBlock->rotation = 0;
 	}
 }
 
