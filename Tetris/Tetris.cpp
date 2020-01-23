@@ -11,7 +11,7 @@ void setMap(int map[][WIDTH]) {		// 맵 초기화(테두리 생성).
 	}
 }
 
-void printMap(const int map[][WIDTH]) {
+void printMap(const int map[][WIDTH]) {		// 초기화된 맵 출력
 	gotoxy(0, 0);
 	for (int i = 0; i < HEIGHT; i++) {
 		for (int j = 0; j < WIDTH; j++) {
@@ -24,12 +24,12 @@ void printMap(const int map[][WIDTH]) {
 
 void setBlock(BLOCK* pBlock) {		// 블럭 의 속성값 초기화.
 	POINT* point = pBlock->blockPoint;
-	setPoint(point, 2 * 3, -1);	// 블럭의 기준점을 (2 * 3, -1)으로 초기화
+	setPoint(point, 2 * 3, -1);	// 블럭의 중심점을 (2 * 3, -1)으로 초기화
 
 	pBlock->blockType = (TYPE)(rand() % 7);
 
 
-	switch (pBlock->blockType) {
+	switch (pBlock->blockType) {		// 하나의 블럭을 구성하는 4개의 작은 블럭들을 중심점 기준으로 좌표 초기화. 
 	case BLOCK_O:
 		setPoint(&point[1], point->x - 1, point->y);
 		setPoint(&point[2], point->x - 1, point->y - 1);
@@ -67,7 +67,7 @@ void setBlock(BLOCK* pBlock) {		// 블럭 의 속성값 초기화.
 		break;
 	}
 
-	switch (pBlock->blockType) {
+	switch (pBlock->blockType) {		// 각 블럭의 최대 회전 횟수 설정.
 	case BLOCK_O: pBlock->rotationCycle = 1; break;
 	case BLOCK_I:
 	case BLOCK_Z:
@@ -77,16 +77,16 @@ void setBlock(BLOCK* pBlock) {		// 블럭 의 속성값 초기화.
 	case BLOCK_T: pBlock->rotationCycle = 4;
 	}
 
-	pBlock->rotation = 1;
+	pBlock->rotation = 1;		// 블럭의 현재 회전 상태 초기화.
 }
 
-void setPoint(POINT* pPoint, int x, int y) {
+void setPoint(POINT* pPoint, int x, int y) {		// 블럭의 x, y좌표 값을 입력받은 대로 연산.
 	pPoint->x = x;
 	pPoint->y = y;
 }
 
-void removeBlock(const int map[][WIDTH], BLOCK* pBlock) { // 이 블럭에 공백을 덮어씌워 지운다.
-	removeBlockPrev(map, pBlock);
+void removeBlock(const int map[][WIDTH], BLOCK* pBlock) {		// 출력된 블럭의 좌표에 공백을 덮어씌워 지운다.
+	removeBlockPrev(map, pBlock);		// 미리보기 블럭 제거
 	for (int i = 0; i < BLOCK_SIZE; i++) {
 		if ((0 < pBlock->blockPoint[i].x && pBlock->blockPoint[i].x < WIDTH - 1) && (0 < pBlock->blockPoint[i].y && pBlock->blockPoint[i].y < HEIGHT - 1)) {   // map의 테두리가 아닐 경우에만
 			gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y);
@@ -95,7 +95,7 @@ void removeBlock(const int map[][WIDTH], BLOCK* pBlock) { // 이 블럭에 공백을 덮
 	}
 }
 
-void dropBlock(const int map[][WIDTH], BLOCK* pBlock) { // 블럭의 모든 point의 y좌표 값을 증가시켜 밑으로 내린다.
+void dropBlock(const int map[][WIDTH], BLOCK* pBlock) { // 블럭의 각 y좌표 값을 증가시켜 드랍시킴.
 	removeBlock(map, pBlock);
 	for (int i = 0; i < BLOCK_SIZE; i++) {
 		(pBlock->blockPoint[i].y)++;
@@ -103,34 +103,32 @@ void dropBlock(const int map[][WIDTH], BLOCK* pBlock) { // 블럭의 모든 point의 y
 	putBlock(map, pBlock);
 }
 
-void rotateBlock(const int map[][WIDTH], BLOCK* pBlock) { // 기준점 중심으로 반시계 방향으로 90도 회전.
-	if (pBlock->rotationCycle == 1) return;	// BLOCK_O일 때엔 즉시 리턴
+void rotateBlock(const int map[][WIDTH], BLOCK* pBlock) { // 블럭을 회전시키는 함수.
+	int rotatedir;		// 블럭이 원상태로 돌아가기까지의 회전 횟수.
+	POINT* point = pBlock->blockPoint;
 
-	int delta_x = 0;
-	int delta_y = 0;
-	int rotatedir = 0;	// 블럭을 초기 상태로 되돌리기까지 필요한 회전 횟수
-
-	if (pBlock->rotationCycle == pBlock->rotation) {		// 회전 횟수가 최대일 때
-		rotatedir = (2 < pBlock->rotationCycle ? 1 : -1);		// 2번 돌리는 블럭은 1, 4번 돌리는 블럭은 -1
-
-		for (int i = 0; i < BLOCK_SIZE; i++) {
-			delta_x = pBlock->blockPoint[i].x - pBlock->blockPoint[0].x;
-			delta_y = pBlock->blockPoint[i].y - pBlock->blockPoint[0].y;
-			setPoint(&pBlock->blockPoint[i], pBlock->blockPoint[0].x - delta_y * rotatedir, pBlock->blockPoint[0].y + delta_x * rotatedir);
-		}
-		pBlock->rotation = 1;
-	}
-	else {
-		for (int i = 0; i < BLOCK_SIZE; i++) {
-			delta_x = pBlock->blockPoint[i].x - pBlock->blockPoint[0].x;
-			delta_y = pBlock->blockPoint[i].y - pBlock->blockPoint[0].y;
-			setPoint(&pBlock->blockPoint[i], pBlock->blockPoint[0].x - delta_y, pBlock->blockPoint[0].y + delta_x);
-		}
+	if (pBlock->rotation != pBlock->rotationCycle) {		// 아직 최대 회전 횟수를 넘기지 않았다면
+		rotatedir = 1;
 		pBlock->rotation++;
+	}
+	else {		// 최대 회전 횟수를 넘겼다면
+		switch (pBlock->rotationCycle) {
+		case 1: return;
+		case 2: rotatedir = -1; break;
+		case 4: rotatedir = 1;
+		}
+		pBlock->rotation = 0;
+	}
+
+	// rotatedir이 1이면 양의 방향으로 90도 회전, -1이면 음의 방향으로 90도 회전.
+	for (int i = 0; i < BLOCK_SIZE; i++) {
+		int delta_x = point[i].x - point[0].x;
+		int delta_y = point[i].y - point[0].y;
+		setPoint(&point[i], point[0].x - rotatedir * delta_y, point[0].y + rotatedir * delta_x);
 	}
 }
 
-void putBlock(const int map[][WIDTH], BLOCK* pBlock) { // moveBlock에 의해 옮겨진 좌표로 블럭을 출력한다.
+void putBlock(const int map[][WIDTH], BLOCK* pBlock) { // 저장된 좌표로 이동하여 블럭을 출력함.
 	putBlockPrev(map, pBlock);
 	for (int i = 0; i < BLOCK_SIZE; i++) {
 		gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y);
@@ -138,7 +136,7 @@ void putBlock(const int map[][WIDTH], BLOCK* pBlock) { // moveBlock에 의해 옮겨�
 	}
 }
 
-void putBlockPrev(const int map[][WIDTH], BLOCK* pBlock) {		// 떨어지는 블록이 떨어질 위치를 미리 보여줌
+void putBlockPrev(const int map[][WIDTH], BLOCK* pBlock) {		// 드랍 중인 블록의 미리보기 출력.
 	int deltaY = getDeltaY(map, pBlock);
 
 	for (int i = 0; i < BLOCK_SIZE; i++) {
@@ -147,7 +145,7 @@ void putBlockPrev(const int map[][WIDTH], BLOCK* pBlock) {		// 떨어지는 블록이 �
 	}
 }
 
-void removeBlockPrev(const int map[][WIDTH], BLOCK* pBlock) {
+void removeBlockPrev(const int map[][WIDTH], BLOCK* pBlock) {		// 미리보기 위에 공백을 출력하여 덮어씌움.
 	int deltaY = getDeltaY(map, pBlock);
 
 	for (int i = 0; i < BLOCK_SIZE; i++) {
@@ -161,7 +159,7 @@ void gotoxy(int x, int y) {		// 커서를 해당 좌표로 이동
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), Cur);
 }
 
-int getDeltaY(const int map[][WIDTH], BLOCK* pBlock) {	// 떨어지는 블럭과 바닥 간의 거리를 리턴하는 함수
+int getDeltaY(const int map[][WIDTH], BLOCK* pBlock) {	// 떨어지는 블럭과 바닥 간의 거리를 리턴하는 함수.
 	int deltaY = HEIGHT;		// 떨어지는 블럭과 바닥간의 거리를 저장. 최종적으로 최솟값을 얻는 것이 목표이므로 최댓값으로 초기화
 
 	for (int i = 0; i < BLOCK_SIZE; i++) {
