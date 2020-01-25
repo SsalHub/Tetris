@@ -105,6 +105,7 @@ void dropBlock(const int map[][WIDTH], BLOCK* pBlock) { // ºí·°ÀÇ °¢ yÁÂÇ¥ °ªÀ» 
 
 void rotateBlock(const int map[][WIDTH], BLOCK* pBlock) { // ºí·°À» È¸Àü½ÃÅ°´Â ÇÔ¼ö.
 	int rotatedir;		// ºí·°ÀÌ ¿ø»óÅÂ·Î µ¹¾Æ°¡±â±îÁöÀÇ È¸Àü È½¼ö.
+	int deltaX;	// mapÀÇ Å×µÎ¸®·ÎºÎÅÍ Æ¢¾î³ª¿Â xÁÂÇ¥ °Å¸®
 	POINT* point = pBlock->blockPoint;
 
 	if (pBlock->rotation != pBlock->rotationCycle) {		// ¾ÆÁ÷ ÃÖ´ë È¸Àü È½¼ö¸¦ ³Ñ±âÁö ¾Ê¾Ò´Ù¸é
@@ -117,7 +118,7 @@ void rotateBlock(const int map[][WIDTH], BLOCK* pBlock) { // ºí·°À» È¸Àü½ÃÅ°´Â Ç
 		case 2: rotatedir = -1; break;
 		case 4: rotatedir = 1;
 		}
-		pBlock->rotation = 0;
+		pBlock->rotation = 1;
 	}
 
 	// rotatedirÀÌ 1ÀÌ¸é ¾çÀÇ ¹æÇâÀ¸·Î 90µµ È¸Àü, -1ÀÌ¸é À½ÀÇ ¹æÇâÀ¸·Î 90µµ È¸Àü.
@@ -125,6 +126,15 @@ void rotateBlock(const int map[][WIDTH], BLOCK* pBlock) { // ºí·°À» È¸Àü½ÃÅ°´Â Ç
 		int delta_x = point[i].x - point[0].x;
 		int delta_y = point[i].y - point[0].y;
 		setPoint(&point[i], point[0].x - rotatedir * delta_y, point[0].y + rotatedir * delta_x);
+	}
+
+	deltaX = getDeltaXfromSide(map, pBlock);	// mapÀÇ Å×µÎ¸®·ÎºÎÅÍ °¡Àå ¸¹ÀÌ Æ¢¾î³ª¿Â °Å¸®°ª ¸®ÅÏ. ¾øÀ»½Ã 0
+	/* ºí·°ÀÌ Å×µÎ¸®¿¡ ´ê°Å³ª ¹ÛÀ¸·Î ³ª°¬´Ù¸é */
+	if (deltaX) {
+		/* Æ¢¾î³ª¿Â °Å¸®¸¸Å­ xÁÂÇ¥ º¯°æ */
+		for (int i = 0; i < BLOCK_SIZE; i++) {
+			pBlock->blockPoint[i].x -= deltaX;
+		}
 	}
 }
 
@@ -172,4 +182,34 @@ int getDeltaY(const int map[][WIDTH], BLOCK* pBlock) {	// ¶³¾îÁö´Â ºí·°°ú ¹Ù´Ú °
 	}
 
 	return deltaY;
+}
+
+int getDeltaXfromSide(const int map[][WIDTH], BLOCK* pBlock) {	// mapÀÇ Å×µÎ¸®·ÎºÎÅÍ ºí·° °£ÀÇ xÁÂÇ¥ °Å¸®¸¦ ¸®ÅÏ. ¸¸¾à ºí·°ÀÌ Å×µÎ¸® ¹Û¿¡ ÀÖÁö ¾Ê´Ù¸é 0À» ¸®ÅÏ
+	const float midOfWidth = (WIDTH - 2) / 2.0f;	// mapÀÇ xÁÂÇ¥ Áß Áß¾Ó ÁÂÇ¥ -> (WIDTH - 2(¾ç Å×µÎ¸®)) / 2.0 = 5.5
+	float deltaX = 0.0f;		// mapÀÇ Å×µÎ¸®·ÎºÎÅÍ ºí·° °£ÀÇ xÁÂÇ¥ °Å¸®.
+
+	// mapÀÇ Áß¾ÓÀ¸·ÎºÎÅÍÀÇ °Å¸®°¡ °¡Àå Å©´Ù¸é deltaX¿¡ ÀúÀå. ¾ø´Ù¸é ÃÊ±â°ªÀÎ 0ÀÌ ÀúÀåµÊ
+	for (int i = 1; i < BLOCK_SIZE; i++) {
+		if (midOfWidth <= ABS_NUM(pBlock->blockPoint[i].x - midOfWidth)) { // xÁÂÇ¥°¡ mapÀÇ Å×µÎ¸® ¹ÛÀ¸·Î ³ª°¬´Ù¸é
+			if (deltaX) {		// ºñ±³ ´ë»óÀÌ ÀÖ´Ù¸é
+				if (ABS_NUM(pBlock->blockPoint[i].x - midOfWidth) > ABS_NUM(deltaX))		// ÇöÀç xÁÂÇ¥°¡ Æ¢¾î³ª¿Â °Å¸®¿Í ºñ±³´ë»óÀÇ xÁÂÇ¥°¡ Æ¢¾î³ª¿Â °Å¸® ºñ±³
+					deltaX = pBlock->blockPoint[i].x - midOfWidth;
+			}
+			else    // ºñ±³ ´ë»óÀÌ ¾ø´Ù¸é
+				deltaX = pBlock->blockPoint[i].x - midOfWidth;	// ±×³É ÀúÀå
+		}
+	}
+
+	if (deltaX) {	
+		if (0 < deltaX) {	// deltaX°¡ ¾ç¼ö¶ó¸é mapÀÇ ¾ç¼ö ¹æÇâÀ¸·Î Æ¢¾î³ª¿Â °ÍÀÓ. ¾ç¼ö ¹æÇâÀ¸·Î Æ¢¾î³ª¿Ô´Ù¸é
+			deltaX += midOfWidth;	// (Áß¾ÓÀ¸·ÎºÎÅÍÀÇ xÁÂÇ¥ °Å¸®) + (Áß¾Ó ÁÂÇ¥) = (¿ø·¡ xÁÂÇ¥)
+			deltaX -= 10;		// (¿ø·¡ xÁÂÇ¥) - (Å×µÎ¸® Á÷ÀüÀÇ xÁÂÇ¥) = (Å×µÎ¸®±îÁöÀÇ xÁÂÇ¥ °Å¸®)
+		}
+		else {
+			deltaX += midOfWidth;	// (Áß¾ÓÀ¸·ÎºÎÅÍÀÇ xÁÂÇ¥ °Å¸®) + (Áß¾Ó ÁÂÇ¥) = (¿ø·¡ ÁÂÇ¥)
+			deltaX -= 1;			// (¿ø·¡ xÁÂÇ¥) - (Å×µÎ¸® Á÷ÀüÀÇ xÁÂÇ¥) = (Å×µÎ¸®±îÁöÀÇ xÁÂÇ¥ °Å¸®)
+		}
+	}
+
+	return (int)deltaX;
 }
