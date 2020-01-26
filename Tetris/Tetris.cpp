@@ -28,7 +28,6 @@ void setBlock(BLOCK* pBlock) {		// 블럭 의 속성값 초기화.
 
 	pBlock->blockType = (TYPE)(rand() % 7);
 
-
 	switch (pBlock->blockType) {		// 하나의 블럭을 구성하는 4개의 작은 블럭들을 중심점 기준으로 좌표 초기화. 
 	case BLOCK_O:
 		setPoint(&point[1], point->x - 1, point->y);
@@ -180,36 +179,25 @@ int getDeltaY(const int map[][WIDTH], BLOCK* pBlock) {	// 떨어지는 블럭과 바닥 �
 			}
 		}
 	}
-
 	return deltaY;
 }
 
 int getDeltaXfromSide(const int map[][WIDTH], BLOCK* pBlock) {	// map의 테두리로부터 블럭 간의 x좌표 거리를 리턴. 만약 블럭이 테두리 밖에 있지 않다면 0을 리턴
-	const float midOfWidth = (WIDTH - 2) / 2.0f;	// map의 x좌표 중 중앙 좌표 -> (WIDTH - 2(양 테두리)) / 2.0 = 5.5
-	float deltaX = 0.0f;		// map의 테두리로부터 블럭 간의 x좌표 거리.
+	int X, tmp;
+	int deltaX = 0;		// map의 테두리로부터 블럭 간의 x좌표 거리.
 
-	// map의 중앙으로부터의 거리가 가장 크다면 deltaX에 저장. 없다면 초기값인 0이 저장됨
-	for (int i = 1; i < BLOCK_SIZE; i++) {
-		if (midOfWidth <= ABS_NUM(pBlock->blockPoint[i].x - midOfWidth)) { // x좌표가 map의 테두리 밖으로 나갔다면
-			if (deltaX) {		// 비교 대상이 있다면
-				if (ABS_NUM(pBlock->blockPoint[i].x - midOfWidth) > ABS_NUM(deltaX))		// 현재 x좌표가 튀어나온 거리와 비교대상의 x좌표가 튀어나온 거리 비교
-					deltaX = pBlock->blockPoint[i].x - midOfWidth;
-			}
-			else    // 비교 대상이 없다면
-				deltaX = pBlock->blockPoint[i].x - midOfWidth;	// 그냥 저장
-		}
+	for (int i = 0; i < BLOCK_SIZE; i++) {
+		X = pBlock->blockPoint[i].x;		// 현재 블럭의 x좌표
+
+		if (X < 1)			// map의 왼쪽 테두리 밖으로 나간 경우
+			tmp = X - 1;
+		else if (WIDTH - 2 < X)			// map의 오른쪽 테두리 밖으로 나간 경우
+			tmp = X - (WIDTH - 2);
+		else		// 테두리 밖으로 나가지 않은 경우
+			tmp = 0;
+
+		if (tmp && abs(tmp) > abs(deltaX))		// 테두리 밖으로 나간 거리 값 중 가장 큰 값을 사용
+			deltaX = tmp;
 	}
-
-	if (deltaX) {	
-		if (0 < deltaX) {	// deltaX가 양수라면 map의 양수 방향으로 튀어나온 것임. 양수 방향으로 튀어나왔다면
-			deltaX += midOfWidth;	// (중앙으로부터의 x좌표 거리) + (중앙 좌표) = (원래 x좌표)
-			deltaX -= 10;		// (원래 x좌표) - (테두리 직전의 x좌표) = (테두리까지의 x좌표 거리)
-		}
-		else {
-			deltaX += midOfWidth;	// (중앙으로부터의 x좌표 거리) + (중앙 좌표) = (원래 좌표)
-			deltaX -= 1;			// (원래 x좌표) - (테두리 직전의 x좌표) = (테두리까지의 x좌표 거리)
-		}
-	}
-
-	return (int)deltaX;
+	return deltaX;
 }
