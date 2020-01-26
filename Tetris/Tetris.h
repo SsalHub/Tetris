@@ -20,14 +20,14 @@
 #define KEY_DOWN 80
 #define KEY_SPACE 32
 
-#define GET_MIN(n1, n2) ((n1) < (n2) ? (n1) : (n2))		// 더 작은 수를 리턴하는 매크로 함수
+#define GET_MAX(n1, n2) ((n1) > (n2) ? (n1) : (n2))		// 더 큰 수를 계산하는 매크로 함수
+#define GET_MIN(n1, n2) ((n1) < (n2) ? (n1) : (n2))		// 더 작은 수를 계산하는 매크로 함수
 
 typedef enum type { BLOCK_I, BLOCK_O, BLOCK_Z, BLOCK_S, BLOCK_J, BLOCK_L, BLOCK_T } TYPE; // 블럭의 종류(7가지)를 열거형으로 정의.
 
 typedef struct block {
 	TYPE blockType;
 	POINT blockPoint[4];			// 배열의 첫 요소가 기준점.
-	int rotation, rotationCycle;	// 회전 횟수, 반복 주기.
 	short nFrame = 0;				// 떨어지는 속도.
 } BLOCK;
 
@@ -43,5 +43,6 @@ void putBlockPrev(const int map[][WIDTH], BLOCK* pBlock);
 void removeBlockPrev(const int map[][WIDTH], BLOCK* pBlock);
 void gotoxy(int x, int y);
 int getDeltaY(const int map[][WIDTH], BLOCK* pBlock);
+int getDeltaXfromSide(const int map[][WIDTH], BLOCK* pBlock);
 
 #endif		// #ifndef문 종료
