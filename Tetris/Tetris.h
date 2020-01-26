@@ -28,7 +28,6 @@ typedef enum type { BLOCK_I, BLOCK_O, BLOCK_Z, BLOCK_S, BLOCK_J, BLOCK_L, BLOCK_
 typedef struct block {
 	TYPE blockType;
 	POINT blockPoint[4];			// 배열의 첫 요소가 기준점.
-	int rotation, rotationCycle;	// 회전 횟수, 반복 주기.
 	short nFrame = 0;				// 떨어지는 속도.
 } BLOCK;
 

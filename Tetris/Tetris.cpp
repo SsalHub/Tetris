@@ -65,18 +65,6 @@ void setBlock(BLOCK* pBlock) {		// 블럭 의 속성값 초기화.
 		setPoint(&point[3], point->x, point->y - 1);
 		break;
 	}
-
-	switch (pBlock->blockType) {		// 각 블럭의 최대 회전 횟수 설정.
-	case BLOCK_O: pBlock->rotationCycle = 1; break;
-	case BLOCK_I:
-	case BLOCK_Z:
-	case BLOCK_S: pBlock->rotationCycle = 2; break;
-	case BLOCK_J:
-	case BLOCK_L:
-	case BLOCK_T: pBlock->rotationCycle = 4;
-	}
-
-	pBlock->rotation = 1;		// 블럭의 현재 회전 상태 초기화.
 }
 
 void setPoint(POINT* pPoint, int x, int y) {		// 블럭의 x, y좌표 값을 입력받은 대로 연산.
@@ -103,36 +91,24 @@ void dropBlock(const int map[][WIDTH], BLOCK* pBlock) { // 블럭의 각 y좌표 값을 
 }
 
 void rotateBlock(const int map[][WIDTH], BLOCK* pBlock) { // 블럭을 회전시키는 함수.
-	int rotatedir;		// 블럭이 원상태로 돌아가기까지의 회전 횟수.
-	int deltaX;	// map의 테두리로부터 튀어나온 x좌표 거리
+	if (pBlock->blockType == BLOCK_O) return;
+	int delta_x, delta_y;		// 회전할 때, 중심 블럭으로부터 회전할 블럭 사이의 x좌표상의 거리 / y좌표상의 거리
+	int delta_x_from_side;	// map의 테두리로부터 튀어나온 x좌표 거리
 	POINT* point = pBlock->blockPoint;
 
-	if (pBlock->rotation != pBlock->rotationCycle) {		// 아직 최대 회전 횟수를 넘기지 않았다면
-		rotatedir = 1;
-		pBlock->rotation++;
-	}
-	else {		// 최대 회전 횟수를 넘겼다면
-		switch (pBlock->rotationCycle) {
-		case 1: return;
-		case 2: rotatedir = -1; break;
-		case 4: rotatedir = 1;
-		}
-		pBlock->rotation = 1;
-	}
-
-	// rotatedir이 1이면 양의 방향으로 90도 회전, -1이면 음의 방향으로 90도 회전.
+	// 90도 회전
 	for (int i = 0; i < BLOCK_SIZE; i++) {
-		int delta_x = point[i].x - point[0].x;
-		int delta_y = point[i].y - point[0].y;
-		setPoint(&point[i], point[0].x - rotatedir * delta_y, point[0].y + rotatedir * delta_x);
+		delta_x = point[i].x - point[0].x;
+		delta_y = point[i].y - point[0].y;
+		setPoint(&point[i], point[0].x - delta_y, point[0].y + delta_x);
 	}
 
-	deltaX = getDeltaXfromSide(map, pBlock);	// map의 테두리로부터 가장 많이 튀어나온 거리값 리턴. 없을시 0
+	delta_x_from_side = getDeltaXfromSide(map, pBlock);	// map의 테두리로부터 가장 많이 튀어나온 거리값 리턴. 없을시 0
 	/* 블럭이 테두리에 닿거나 밖으로 나갔다면 */
-	if (deltaX) {
+	if (delta_x_from_side) {
 		/* 튀어나온 거리만큼 x좌표 변경 */
 		for (int i = 0; i < BLOCK_SIZE; i++) {
-			pBlock->blockPoint[i].x -= deltaX;
+			pBlock->blockPoint[i].x -= delta_x_from_side;
 		}
 	}
 }

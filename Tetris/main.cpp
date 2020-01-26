@@ -16,9 +16,7 @@ int main() {
 	BLOCK block;
 	setBlock(&block);
 	gotoxy(2, 27);
-	printf("block.nFrame = "); 
-	gotoxy(30, 2);
-	printf("block.rotation : %d", block.rotation);
+	printf("block.nFrame = ");
 
 	while (getDeltaY(map, &block)) {		// 블록이 맵 바닥까지 떨어질 때까지 반복
 		gotoxy(17, 27);
@@ -77,8 +75,6 @@ int main() {
 							removeBlock(map, &block);
 							rotateBlock(map, &block);
 							putBlock(map, &block);
-							gotoxy(30, 2);
-							printf("block.rotation : %d", block.rotation);
 							break;
 					}
 			}
