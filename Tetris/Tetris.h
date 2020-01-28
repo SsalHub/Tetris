@@ -30,6 +30,7 @@ typedef enum type { BLOCK_I, BLOCK_O, BLOCK_Z, BLOCK_S, BLOCK_J, BLOCK_L, BLOCK_
 typedef struct block {
 	TYPE blockType;
 	POINT blockPoint[4];			// 배열의 첫 요소가 기준점.
+	int deltaY;						// 바닥으로부터 떨어진 거리.
 	short nFrame = 0;				// 떨어지는 속도.
 } BLOCK;
 
@@ -40,6 +41,7 @@ void setPoint(POINT* pPoint, int x, int y);
 void removeBlock(const int map[][WIDTH], BLOCK* pBlock);
 void moveBlockPoint(BLOCK* pBlock, int x, int y);
 void moveBlock(const int map[][WIDTH], BLOCK* pBlock, int x, int y);
+void rotateBlockPoint(const int map[][WIDTH], BLOCK* pBlock);
 void rotateBlock(const int map[][WIDTH], BLOCK* pBlock);
 void putBlock(const int map[][WIDTH], BLOCK* pBlock);
 void putBlockPrev(const int map[][WIDTH], BLOCK* pBlock);

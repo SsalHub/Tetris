@@ -1,78 +1,5 @@
 #include "Tetris.h"
 
-int main() {
-	srand((unsigned int)time(NULL));
-	system("mode con cols=80 lines=30");		// ÇÁ·ÒÇÁÆ® Ã¢ Å©±â Á¶Àý
-
-	int map[HEIGHT][WIDTH] = { 0 };
-	setMap(map);
-	printMap(map);
-
-	BLOCK block;
-	setBlock(&block);
-	gotoxy(5, 27);
-	printf("block.nFrame = ");
-	int DeltaY = 0;
-
-	while (DeltaY = getDeltaY(map, &block)) {		// ºí·ÏÀÌ ¸Ê ¹Ù´Ú±îÁö ¶³¾îÁú ¶§±îÁö ¹Ýº¹
-		gotoxy(16, 27);
-		printf("%03d", block.nFrame);
-
-		/* Å°º¸µå ÀÔ·Â¹Þ´Â ºÎºÐ */
-		if (_kbhit()) {
-			switch (_getch()) {
-			case KEY_SPACE:
-				moveBlock(map, &block, 0, DeltaY);
-				break;
-			case ARROW_KEY_DEFAULT:
-				switch (_getch()) {
-				case KEY_DOWN:
-					moveBlock(map, &block, 0, 1);
-					block.nFrame = FRAME_PER_SEC;
-					break;
-				case KEY_LEFT:
-					for (int i = 0; i < BLOCK_SIZE; i++) {
-						if (block.blockPoint[i].x - 1 <= 0) {
-							goto FAIL;
-						}
-					}
-					moveBlock(map, &block, -1, 0);
-					break;
-				case KEY_RIGHT:
-					for (int i = 0; i < BLOCK_SIZE; i++) {
-						if (WIDTH - 1 <= block.blockPoint[i].x + 1) {
-							goto FAIL;
-						}
-					}
-					moveBlock(map, &block, 1, 0);
-					break;
-				case KEY_UP:
-					removeBlock(map, &block);
-					rotateBlock(map, &block);
-					putBlock(map, &block);
-					break;
-				}
-			}
-		}
-
-		FAIL:;
-		/* Å°º¸µå ÀÔ·Â¹Þ´Â ºÎºÐ ³¡*/
-
-		if (block.nFrame <= 0) {
-			moveBlock(map, &block, 0, 1);
-			gotoxy(16, 27);
-			block.nFrame = FRAME_PER_SEC;
-			printf("%03d", block.nFrame);
-		}
-
-		gotoxy(0, 0);
-		block.nFrame--;
-		Sleep(1000 / FRAME_PER_SEC);
-	}
-
-	return 0;
-}
-
 void setMap(int map[][WIDTH]) {		// ¸Ê ÃÊ±âÈ­(Å×µÎ¸® »ý¼º).
 	for (int i = 0; i < WIDTH; i++) {
 		map[0][i] = 1;
@@ -101,8 +28,8 @@ void setBlock(BLOCK* pBlock) {		// ºí·° ÀÇ ¼Ó¼º°ª ÃÊ±âÈ­.
 
 	pBlock->blockType = (TYPE)(rand() % 7);
 
-
-	switch (pBlock->blockType) {		// ÇÏ³ªÀÇ ºí·°À» ±¸¼ºÇÏ´Â 4°³ÀÇ ÀÛÀº ºí·°µéÀ» Áß½ÉÁ¡ ±âÁØÀ¸·Î ÁÂÇ¥ ÃÊ±âÈ­. 
+	// ÇÏ³ªÀÇ ºí·°À» ±¸¼ºÇÏ´Â 4°³ÀÇ ÀÛÀº ºí·°µéÀ» Áß½ÉÁ¡ ±âÁØÀ¸·Î ÁÂÇ¥ ÃÊ±âÈ­. 
+	switch (pBlock->blockType) {
 	case BLOCK_O:
 		setPoint(&point[1], point->x - 1, point->y);
 		setPoint(&point[2], point->x - 1, point->y - 1);
@@ -166,11 +93,11 @@ void moveBlockPoint(BLOCK* pBlock, int x, int y) { // ºí·°ÀÇ ¸ðµç Á¡ÀÇ ÁÂÇ¥¸¦ (x
 void moveBlock(const int map[][WIDTH], BLOCK* pBlock, int x, int y) {
 	removeBlock(map, pBlock);
 	moveBlockPoint(pBlock, x, y);
+	pBlock->deltaY = getDeltaY(map, pBlock);
 	putBlock(map, pBlock);
 }
 
-void rotateBlock(const int map[][WIDTH], BLOCK* pBlock) { // ºí·°À» È¸Àü½ÃÅ°´Â ÇÔ¼ö.
-	int deltaX;	// mapÀÇ Å×µÎ¸®·ÎºÎÅÍ Æ¢¾î³ª¿Â xÁÂÇ¥ °Å¸®
+void rotateBlockPoint(const int map[][WIDTH], BLOCK* pBlock) { // ºí·°À» È¸Àü½ÃÅ°´Â ÇÔ¼ö.
 	POINT* point = pBlock->blockPoint;
 
 	if (pBlock->blockType == BLOCK_O) {
@@ -183,12 +110,18 @@ void rotateBlock(const int map[][WIDTH], BLOCK* pBlock) { // ºí·°À» È¸Àü½ÃÅ°´Â Ç
 		setPoint(&point[i], point[0].x - delta_y, point[0].y + delta_x);
 	}
 
-	deltaX = getDeltaXfromSide(map, pBlock);	// mapÀÇ Å×µÎ¸®·ÎºÎÅÍ °¡Àå ¸¹ÀÌ Æ¢¾î³ª¿Â °Å¸®°ª ¸®ÅÏ. ¾øÀ»½Ã 0
-	/* ºí·°ÀÌ Å×µÎ¸®¿¡ ´ê°Å³ª ¹ÛÀ¸·Î ³ª°¬´Ù¸é */
+	int deltaX = getDeltaXfromSide(map, pBlock);
 	if (deltaX) {
 		/* Æ¢¾î³ª¿Â °Å¸®¸¸Å­ xÁÂÇ¥ º¯°æ */
 		moveBlockPoint(pBlock, -deltaX, 0);
 	}
+}
+
+void rotateBlock(const int map[][WIDTH], BLOCK* pBlock) {
+	removeBlock(map, pBlock);
+	rotateBlockPoint(map, pBlock);
+	pBlock->deltaY = getDeltaY(map, pBlock);
+	putBlock(map, pBlock);
 }
 
 void putBlock(const int map[][WIDTH], BLOCK* pBlock) { // ÀúÀåµÈ ÁÂÇ¥·Î ÀÌµ¿ÇÏ¿© ºí·°À» Ãâ·ÂÇÔ.
@@ -200,19 +133,15 @@ void putBlock(const int map[][WIDTH], BLOCK* pBlock) { // ÀúÀåµÈ ÁÂÇ¥·Î ÀÌµ¿ÇÏ¿©
 }
 
 void putBlockPrev(const int map[][WIDTH], BLOCK* pBlock) {		// µå¶ø ÁßÀÎ ºí·ÏÀÇ ¹Ì¸®º¸±â Ãâ·Â.
-	int deltaY = getDeltaY(map, pBlock);
-
 	for (int i = 0; i < BLOCK_SIZE; i++) {
-		gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y + deltaY);
+		gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y + pBlock->deltaY);
 		printf("¡à");
 	}
 }
 
 void removeBlockPrev(const int map[][WIDTH], BLOCK* pBlock) {		// ¹Ì¸®º¸±â À§¿¡ °ø¹éÀ» Ãâ·ÂÇÏ¿© µ¤¾î¾º¿ò.
-	int deltaY = getDeltaY(map, pBlock);
-
 	for (int i = 0; i < BLOCK_SIZE; i++) {
-		gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y + deltaY);
+		gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y + pBlock->deltaY);
 		printf("  ");
 	}
 }
