@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <time.h>
 #include <conio.h>
 #include <Windows.h>
@@ -34,20 +35,20 @@ typedef struct block {
 	short nFrame = 0;				// 떨어지는 속도.
 } BLOCK;
 
-void setMap(int map[][WIDTH]);
-void printMap(const int map[][WIDTH]);
+void setMap(bool map[][WIDTH]);
+void printMap(const bool map[][WIDTH]);
 void setBlock(BLOCK* pBlock);
 void setPoint(POINT* pPoint, int x, int y);
-void removeBlock(const int map[][WIDTH], BLOCK* pBlock);
+void removeBlock(const bool map[][WIDTH], BLOCK* pBlock);
 void moveBlockPoint(BLOCK* pBlock, int x, int y);
-void moveBlock(const int map[][WIDTH], BLOCK* pBlock, int x, int y);
-void rotateBlockPoint(const int map[][WIDTH], BLOCK* pBlock);
-void rotateBlock(const int map[][WIDTH], BLOCK* pBlock);
-void putBlock(const int map[][WIDTH], BLOCK* pBlock);
-void putBlockPrev(const int map[][WIDTH], BLOCK* pBlock);
-void removeBlockPrev(const int map[][WIDTH], BLOCK* pBlock);
+void moveBlock(const bool map[][WIDTH], BLOCK* pBlock, int x, int y);
+void rotateBlockPoint(const bool map[][WIDTH], BLOCK* pBlock);
+void rotateBlock(const bool map[][WIDTH], BLOCK* pBlock);
+void putBlock(const bool map[][WIDTH], BLOCK* pBlock);
+void putBlockPrev(const bool map[][WIDTH], BLOCK* pBlock);
+void removeBlockPrev(const bool map[][WIDTH], BLOCK* pBlock);
 void gotoxy(int x, int y);
-int getDeltaY(const int map[][WIDTH], BLOCK* pBlock);
-int getDeltaXfromSide(const int map[][WIDTH], BLOCK* pBlock);
+int getDeltaY(const bool map[][WIDTH], BLOCK* pBlock);
+int getDeltaXfromSide(const bool map[][WIDTH], BLOCK* pBlock);
 
 #endif		// #ifndef문 종료

@@ -1,6 +1,6 @@
 #include "Tetris.h"
 
-void setMap(int map[][WIDTH]) {		// ¸Ê ÃÊ±âÈ­(Å×µÎ¸® »ý¼º).
+void setMap(bool map[][WIDTH]) {		// ¸Ê ÃÊ±âÈ­(Å×µÎ¸® »ý¼º).
 	for (int i = 0; i < WIDTH; i++) {
 		map[0][i] = 1;
 		map[HEIGHT - 1][i] = 1;
@@ -11,7 +11,7 @@ void setMap(int map[][WIDTH]) {		// ¸Ê ÃÊ±âÈ­(Å×µÎ¸® »ý¼º).
 	}
 }
 
-void printMap(const int map[][WIDTH]) {		// ÃÊ±âÈ­µÈ ¸Ê Ãâ·Â
+void printMap(const bool map[][WIDTH]) {		// ÃÊ±âÈ­µÈ ¸Ê Ãâ·Â
 	gotoxy(0, 0);
 	for (int i = 0; i < HEIGHT; i++) {
 		for (int j = 0; j < WIDTH; j++) {
@@ -73,7 +73,7 @@ void setPoint(POINT* pPoint, int x, int y) {		// ºí·°ÀÇ x, yÁÂÇ¥ °ªÀ» ÀÔ·Â¹ÞÀº ´
 	pPoint->y = y;
 }
 
-void removeBlock(const int map[][WIDTH], BLOCK* pBlock) {		// Ãâ·ÂµÈ ºí·°ÀÇ ÁÂÇ¥¿¡ °ø¹éÀ» µ¤¾î¾º¿ö Áö¿î´Ù.
+void removeBlock(const bool map[][WIDTH], BLOCK* pBlock) {		// Ãâ·ÂµÈ ºí·°ÀÇ ÁÂÇ¥¿¡ °ø¹éÀ» µ¤¾î¾º¿ö Áö¿î´Ù.
 	removeBlockPrev(map, pBlock);		// ¹Ì¸®º¸±â ºí·° Á¦°Å
 	for (int i = 0; i < BLOCK_SIZE; i++) {
 		if ((0 < pBlock->blockPoint[i].x && pBlock->blockPoint[i].x < WIDTH - 1) && (0 < pBlock->blockPoint[i].y && pBlock->blockPoint[i].y < HEIGHT - 1)) {   // mapÀÇ Å×µÎ¸®°¡ ¾Æ´Ò °æ¿ì¿¡¸¸
@@ -90,14 +90,14 @@ void moveBlockPoint(BLOCK* pBlock, int x, int y) { // ºí·°ÀÇ ¸ðµç Á¡ÀÇ ÁÂÇ¥¸¦ (x
 	}
 }
 
-void moveBlock(const int map[][WIDTH], BLOCK* pBlock, int x, int y) {
+void moveBlock(const bool map[][WIDTH], BLOCK* pBlock, int x, int y) {
 	removeBlock(map, pBlock);
 	moveBlockPoint(pBlock, x, y);
 	pBlock->deltaY = getDeltaY(map, pBlock);
 	putBlock(map, pBlock);
 }
 
-void rotateBlockPoint(const int map[][WIDTH], BLOCK* pBlock) { // ºí·°À» È¸Àü½ÃÅ°´Â ÇÔ¼ö.
+void rotateBlockPoint(const bool map[][WIDTH], BLOCK* pBlock) { // ºí·°À» È¸Àü½ÃÅ°´Â ÇÔ¼ö.
 	POINT* point = pBlock->blockPoint;
 
 	if (pBlock->blockType == BLOCK_O) {
@@ -117,14 +117,14 @@ void rotateBlockPoint(const int map[][WIDTH], BLOCK* pBlock) { // ºí·°À» È¸Àü½ÃÅ
 	}
 }
 
-void rotateBlock(const int map[][WIDTH], BLOCK* pBlock) {
+void rotateBlock(const bool map[][WIDTH], BLOCK* pBlock) {
 	removeBlock(map, pBlock);
 	rotateBlockPoint(map, pBlock);
 	pBlock->deltaY = getDeltaY(map, pBlock);
 	putBlock(map, pBlock);
 }
 
-void putBlock(const int map[][WIDTH], BLOCK* pBlock) { // ÀúÀåµÈ ÁÂÇ¥·Î ÀÌµ¿ÇÏ¿© ºí·°À» Ãâ·ÂÇÔ.
+void putBlock(const bool map[][WIDTH], BLOCK* pBlock) { // ÀúÀåµÈ ÁÂÇ¥·Î ÀÌµ¿ÇÏ¿© ºí·°À» Ãâ·ÂÇÔ.
 	putBlockPrev(map, pBlock);
 	for (int i = 0; i < BLOCK_SIZE; i++) {
 		gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y);
@@ -132,14 +132,14 @@ void putBlock(const int map[][WIDTH], BLOCK* pBlock) { // ÀúÀåµÈ ÁÂÇ¥·Î ÀÌµ¿ÇÏ¿©
 	}
 }
 
-void putBlockPrev(const int map[][WIDTH], BLOCK* pBlock) {		// µå¶ø ÁßÀÎ ºí·ÏÀÇ ¹Ì¸®º¸±â Ãâ·Â.
+void putBlockPrev(const bool map[][WIDTH], BLOCK* pBlock) {		// µå¶ø ÁßÀÎ ºí·ÏÀÇ ¹Ì¸®º¸±â Ãâ·Â.
 	for (int i = 0; i < BLOCK_SIZE; i++) {
 		gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y + pBlock->deltaY);
 		printf("¡à");
 	}
 }
 
-void removeBlockPrev(const int map[][WIDTH], BLOCK* pBlock) {		// ¹Ì¸®º¸±â À§¿¡ °ø¹éÀ» Ãâ·ÂÇÏ¿© µ¤¾î¾º¿ò.
+void removeBlockPrev(const bool map[][WIDTH], BLOCK* pBlock) {		// ¹Ì¸®º¸±â À§¿¡ °ø¹éÀ» Ãâ·ÂÇÏ¿© µ¤¾î¾º¿ò.
 	for (int i = 0; i < BLOCK_SIZE; i++) {
 		gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y + pBlock->deltaY);
 		printf("  ");
@@ -151,7 +151,7 @@ void gotoxy(int x, int y) {		// Ä¿¼­¸¦ ÇØ´ç ÁÂÇ¥·Î ÀÌµ¿
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), Cur);
 }
 
-int getDeltaY(const int map[][WIDTH], BLOCK* pBlock) {	// ¶³¾îÁö´Â ºí·°°ú ¹Ù´Ú °£ÀÇ °Å¸®¸¦ ¸®ÅÏÇÏ´Â ÇÔ¼ö.
+int getDeltaY(const bool map[][WIDTH], BLOCK* pBlock) {	// ¶³¾îÁö´Â ºí·°°ú ¹Ù´Ú °£ÀÇ °Å¸®¸¦ ¸®ÅÏÇÏ´Â ÇÔ¼ö.
 	int deltaY = HEIGHT;		// ¶³¾îÁö´Â ºí·°°ú ¹Ù´Ú°£ÀÇ °Å¸®¸¦ ÀúÀå. ÃÖÁ¾ÀûÀ¸·Î ÃÖ¼Ú°ªÀ» ¾ò´Â °ÍÀÌ ¸ñÇ¥ÀÌ¹Ç·Î ÃÖ´ñ°ªÀ¸·Î ÃÊ±âÈ­
 
 	for (int i = 0; i < BLOCK_SIZE; i++) {
@@ -166,7 +166,7 @@ int getDeltaY(const int map[][WIDTH], BLOCK* pBlock) {	// ¶³¾îÁö´Â ºí·°°ú ¹Ù´Ú °
 	return deltaY;
 }
 
-int getDeltaXfromSide(const int map[][WIDTH], BLOCK* pBlock) {
+int getDeltaXfromSide(const bool map[][WIDTH], BLOCK* pBlock) {
 	int deltaX = 0;
 	for (int i = 1; i < BLOCK_SIZE; i++) {
 		int X = pBlock->blockPoint[i].x;

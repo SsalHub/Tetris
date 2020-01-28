@@ -4,7 +4,7 @@ int main() {
 	srand((unsigned int)time(NULL));
 	system("mode con cols=80 lines=30");		// 프롬프트 창 크기 조절
 
-	int map[HEIGHT][WIDTH] = { 0 };
+	bool map[HEIGHT][WIDTH] = { 0 };
 	setMap(map);
 	printMap(map);
 
