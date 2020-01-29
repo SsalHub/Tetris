@@ -5,9 +5,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <time.h>
 #include <conio.h>
 #include <Windows.h>
+#include <math.h>
 
 #define WIDTH 12					// 맵의 너비
 #define HEIGHT 27					// 맵의 높이
@@ -23,26 +25,29 @@
 #define GET_MAX(n1, n2) ((n1) > (n2) ? (n1) : (n2))		// 더 큰 수를 계산하는 매크로 함수
 #define GET_MIN(n1, n2) ((n1) < (n2) ? (n1) : (n2))		// 더 작은 수를 계산하는 매크로 함수
 
-typedef enum type { BLOCK_I, BLOCK_O, BLOCK_Z, BLOCK_S, BLOCK_J, BLOCK_L, BLOCK_T } TYPE; // 블럭의 종류(7가지)를 열거형으로 정의.
+typedef enum { BLOCK_I, BLOCK_O, BLOCK_Z, BLOCK_S, BLOCK_J, BLOCK_L, BLOCK_T } TYPE; // 블럭의 종류(7가지)를 열거형으로 정의.
 
-typedef struct block {
+typedef struct {
 	TYPE blockType;
 	POINT blockPoint[4];			// 배열의 첫 요소가 기준점.
+	int deltaY;						// 바닥으로부터 떨어진 거리.
 	short nFrame = 0;				// 떨어지는 속도.
 } BLOCK;
 
-void setMap(int map[][WIDTH]);
-void printMap(const int map[][WIDTH]);
+void setMap();
+void printMap();
 void setBlock(BLOCK* pBlock);
 void setPoint(POINT* pPoint, int x, int y);
-void removeBlock(const int map[][WIDTH], BLOCK* pBlock);
-void dropBlock(const int map[][WIDTH], BLOCK* pBlock);
-void rotateBlock(const int map[][WIDTH], BLOCK* pBlock);
-void putBlock(const int map[][WIDTH], BLOCK* pBlock);
-void putBlockPrev(const int map[][WIDTH], BLOCK* pBlock);
-void removeBlockPrev(const int map[][WIDTH], BLOCK* pBlock);
+void removeBlock(BLOCK* pBlock);
+void moveBlockPoint(BLOCK* pBlock, int x, int y);
+void moveBlock(BLOCK* pBlock, int x, int y);
+void rotateBlockPoint(BLOCK* pBlock);
+void rotateBlock(BLOCK* pBlock);
+void putBlock(BLOCK* pBlock);
+void putBlockPrev(BLOCK* pBlock);
+void removeBlockPrev(BLOCK* pBlock);
 void gotoxy(int x, int y);
-int getDeltaY(const int map[][WIDTH], BLOCK* pBlock);
-int getDeltaXfromSide(const int map[][WIDTH], BLOCK* pBlock);
+int getDeltaY(BLOCK* pBlock);
+int getDeltaXfromSide(BLOCK* pBlock);
 
 #endif		// #ifndef문 종료

@@ -4,86 +4,67 @@
 	2. https://pang2h.tistory.com/129
 */
 
+bool map[HEIGHT][WIDTH] = { 0 };
+
 int main() {
 	srand((unsigned int)time(NULL));
 	system("mode con cols=80 lines=30");		// 프롬프트 창 크기 조절
 
-	int deltaY = 0;
-	int map[HEIGHT][WIDTH] = { 0 };
-	setMap(map);
-	printMap(map);
+	setMap();
+	printMap();
 
 	BLOCK block;
 	setBlock(&block);
 	gotoxy(2, 27);
 	printf("block.nFrame = ");
+	block.deltaY = getDeltaY(&block);
 
-	while (getDeltaY(map, &block)) {		// 블록이 맵 바닥까지 떨어질 때까지 반복
+
+	while (block.deltaY) {		// 블록이 맵 바닥까지 떨어질 때까지 반복
 		gotoxy(17, 27);
 		printf("%03d", block.nFrame);
-
 
 		/* 키보드 입력받는 부분 */
 		if (_kbhit()) {
 			switch (_getch()) {
-				case KEY_SPACE :
-					deltaY = getDeltaY(map, &block);
-					removeBlock(map, &block);
-					for (int i = 0; i < BLOCK_SIZE; i++) {
-						block.blockPoint[i].y += deltaY;
-					}
-					putBlock(map, &block);
+			case KEY_SPACE:
+				moveBlock(&block, 0, block.deltaY);
+				break;
+			case ARROW_KEY_DEFAULT:
+				switch (_getch()) {
+				case KEY_DOWN:
+					moveBlock(&block, 0, 1);
+					block.nFrame = FRAME_PER_SEC;
 					break;
-				case ARROW_KEY_DEFAULT :
-					switch (_getch()) {
-						case KEY_DOWN:
-							removeBlock(map, &block);
-							for (int i = 0; i < BLOCK_SIZE; i++) {
-								block.blockPoint[i].y++;
-								block.nFrame = FRAME_PER_SEC;
-							}
-							putBlock(map, &block);
-							break;
-						case KEY_LEFT :
-							removeBlock(map, &block);
-							for (int i = 0; i < BLOCK_SIZE; i++) {
-								if (block.blockPoint[i].x - 1 <= 0)
-									break;
-								else if (i == BLOCK_SIZE - 1) {
-									for (int i = 0; i < BLOCK_SIZE; i++) {
-										block.blockPoint[i].x--;
-									}
-								}
-							}
-							putBlock(map, &block);
-							break;
-						case KEY_RIGHT : 
-							removeBlock(map, &block);
-							for (int i = 0; i < BLOCK_SIZE; i++) {
-								if (WIDTH - 1 <= block.blockPoint[i].x + 1)
-									break;
-								else if (i == BLOCK_SIZE - 1) {
-									for (int i = 0; i < BLOCK_SIZE; i++) {
-										block.blockPoint[i].x++;
-									}
-
-								}
-							}
-							putBlock(map, &block);
-							break;
-						case KEY_UP:
-							removeBlock(map, &block);
-							rotateBlock(map, &block);
-							putBlock(map, &block);
-							break;
+				case KEY_LEFT:
+					for (int i = 0; i < BLOCK_SIZE; i++) {
+						if (block.blockPoint[i].x - 1 <= 0) {
+							goto FAIL;
+						}
 					}
+					moveBlock(&block, -1, 0);
+					break;
+				case KEY_RIGHT:
+					for (int i = 0; i < BLOCK_SIZE; i++) {
+						if (WIDTH - 1 <= block.blockPoint[i].x + 1) {
+							goto FAIL;
+						}
+					}
+					moveBlock(&block, 1, 0);
+					break;
+				case KEY_UP:
+					rotateBlock(&block);
+					break;
+				}
 			}
 		}
+
+	FAIL:;
 		/* 키보드 입력받는 부분 끝*/
 
-
 		if (block.nFrame <= 0) {
-			dropBlock(map, &block);
+
+			moveBlock(&block, 0, 1);
 			gotoxy(17, 27);
 			block.nFrame = FRAME_PER_SEC;
 			printf("%03d", block.nFrame);
