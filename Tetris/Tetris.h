@@ -26,9 +26,9 @@
 #define GET_MIN(n1, n2) ((n1) < (n2) ? (n1) : (n2))		// 더 작은 수를 계산하는 매크로 함수
 #define ABS_NUM(n) (0 < (n) ? (n) : -(n))						// 절댓값을 계산하는 매크로 함수
 
-typedef enum type { BLOCK_I, BLOCK_O, BLOCK_Z, BLOCK_S, BLOCK_J, BLOCK_L, BLOCK_T } TYPE; // 블럭의 종류(7가지)를 열거형으로 정의.
+typedef enum { BLOCK_I, BLOCK_O, BLOCK_Z, BLOCK_S, BLOCK_J, BLOCK_L, BLOCK_T } TYPE; // 블럭의 종류(7가지)를 열거형으로 정의.
 
-typedef struct block {
+typedef struct {
 	TYPE blockType;
 	POINT blockPoint[4];			// 배열의 첫 요소가 기준점.
 	int deltaY;						// 바닥으로부터 떨어진 거리.
