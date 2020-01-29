@@ -35,20 +35,20 @@ typedef struct block {
 	short nFrame = 0;				// 떨어지는 속도.
 } BLOCK;
 
-void setMap(bool map[][WIDTH]);
-void printMap(const bool map[][WIDTH]);
+void setMap();
+void printMap();
 void setBlock(BLOCK* pBlock);
 void setPoint(POINT* pPoint, int x, int y);
-void removeBlock(const bool map[][WIDTH], BLOCK* pBlock);
+void removeBlock(BLOCK* pBlock);
 void moveBlockPoint(BLOCK* pBlock, int x, int y);
-void moveBlock(const bool map[][WIDTH], BLOCK* pBlock, int x, int y);
-void rotateBlockPoint(const bool map[][WIDTH], BLOCK* pBlock);
-void rotateBlock(const bool map[][WIDTH], BLOCK* pBlock);
-void putBlock(const bool map[][WIDTH], BLOCK* pBlock);
-void putBlockPrev(const bool map[][WIDTH], BLOCK* pBlock);
-void removeBlockPrev(const bool map[][WIDTH], BLOCK* pBlock);
+void moveBlock(BLOCK* pBlock, int x, int y);
+void rotateBlockPoint(BLOCK* pBlock);
+void rotateBlock(BLOCK* pBlock);
+void putBlock(BLOCK* pBlock);
+void putBlockPrev(BLOCK* pBlock);
+void removeBlockPrev(BLOCK* pBlock);
 void gotoxy(int x, int y);
-int getDeltaY(const bool map[][WIDTH], BLOCK* pBlock);
-int getDeltaXfromSide(const bool map[][WIDTH], BLOCK* pBlock);
+int getDeltaY(BLOCK* pBlock);
+int getDeltaXfromSide(BLOCK* pBlock);
 
 #endif		// #ifndef문 종료
