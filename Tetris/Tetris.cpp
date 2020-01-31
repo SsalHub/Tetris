@@ -25,7 +25,7 @@ void printMap() {		// 초기화된 맵 출력
 
 void setBlock(BLOCK* pBlock) {		// 블럭 의 속성값 초기화.
 	POINT* point = pBlock->blockPoint;
-	setPoint(point, 2 * 3, -1);	// 블럭의 중심점을 (2 * 3, -1)으로 초기화
+	setPoint(point, 2 * 3, -1);	// 블럭의 중심점을 (2 * 3, -1)으로 초기화.
 
 	pBlock->blockType = (TYPE)(rand() % 7);
 	// 하나의 블럭을 구성하는 4개의 작은 블럭들을 중심점 기준으로 좌표 초기화. 
@@ -66,6 +66,8 @@ void setBlock(BLOCK* pBlock) {		// 블럭 의 속성값 초기화.
 		setPoint(&point[3], point->x, point->y - 1);
 		break;
 	}
+
+	pBlock->deltaY = getDeltaY(pBlock);
 }
 
 void setPoint(POINT* pPoint, int x, int y) {		// 블럭의 x, y좌표 값을 입력받은 대로 연산.
@@ -132,7 +134,6 @@ void putBlock(BLOCK* pBlock) { // 저장된 좌표로 이동하여 블럭을 출력함.
 	}
 }
 
-
 void putBlockPrev(BLOCK* pBlock) {		// 드랍 중인 블록의 미리보기 출력.
 	for (int i = 0; i < BLOCK_SIZE; i++) {
 		gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y + pBlock->deltaY);
@@ -152,13 +153,12 @@ void gotoxy(int x, int y) {		// 커서를 해당 좌표로 이동
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), Cur);
 }
 
-
 int getDeltaY(BLOCK* pBlock) {	// 떨어지는 블럭과 바닥 간의 거리를 리턴하는 함수.
 	int deltaY = HEIGHT;		// 떨어지는 블럭과 바닥간의 거리를 저장. 최종적으로 최솟값을 얻는 것이 목표이므로 최댓값으로 초기화
 
 	for (int i = 0; i < BLOCK_SIZE; i++) {
-		for (int j = HEIGHT - 1; 1 <= j; j--) {
-			if (map[j][i] != 1) {
+		for (int j = 1; j < HEIGHT; j++) {		// map의 맨 위부터 블록이 쌓여있는 위치를 탐색
+			if (map[j + 1][pBlock->blockPoint[i].x] == 1) {		// 쌓여있는 위치를 찾았다면 
 				deltaY = GET_MIN(deltaY, j - pBlock->blockPoint[i].y);		// 현재 바닥의 y좌표 - 떨어지는 블럭의 y좌표 
 				break;
 			}

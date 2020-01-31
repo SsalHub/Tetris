@@ -14,66 +14,77 @@ int main() {
 	printMap();
 
 	BLOCK block;
-	setBlock(&block);
 	gotoxy(2, 27);
 	printf("block.nFrame = ");
-	block.deltaY = getDeltaY(&block);
 
+	while(1){	// 게임 오버까지
 
-	while (block.deltaY) {		// 블록이 맵 바닥까지 떨어질 때까지 반복
-		gotoxy(17, 27);
-		printf("%03d", block.nFrame);
+		/* 블럭 생성 */
+		setBlock(&block);
 
-		/* 키보드 입력받는 부분 */
-		if (_kbhit()) {
-			switch (_getch()) {
-			case KEY_SPACE:
-				moveBlock(&block, 0, block.deltaY);
-				break;
-			case ARROW_KEY_DEFAULT:
+		/* 블럭 드랍 */
+		while (block.deltaY) {		// 블록이 맵 바닥까지 떨어질 때까지 반복
+			gotoxy(17, 27);
+			printf("%03d", block.nFrame);
+		
+			/* 키보드 입력받는 부분 */
+			if (_kbhit()) {
 				switch (_getch()) {
-				case KEY_DOWN:
-					moveBlock(&block, 0, 1);
-					block.nFrame = FRAME_PER_SEC;
+				case KEY_SPACE:
+					moveBlock(&block, 0, block.deltaY);
 					break;
-				case KEY_LEFT:
-					for (int i = 0; i < BLOCK_SIZE; i++) {
-						if (block.blockPoint[i].x - 1 <= 0) {
-							goto FAIL;
+				case ARROW_KEY_DEFAULT:
+					switch (_getch()) {
+					case KEY_DOWN:
+						moveBlock(&block, 0, 1);
+						block.nFrame = FRAME_PER_SEC;
+						break;
+					case KEY_LEFT:
+						for (int i = 0; i < BLOCK_SIZE; i++) {
+							if (block.blockPoint[i].x - 1 <= 0) {
+								goto FAIL;
+							}
 						}
-					}
-					moveBlock(&block, -1, 0);
-					break;
-				case KEY_RIGHT:
-					for (int i = 0; i < BLOCK_SIZE; i++) {
-						if (WIDTH - 1 <= block.blockPoint[i].x + 1) {
-							goto FAIL;
+						moveBlock(&block, -1, 0);
+						break;
+					case KEY_RIGHT:
+						for (int i = 0; i < BLOCK_SIZE; i++) {
+							if (WIDTH - 1 <= block.blockPoint[i].x + 1) {
+								goto FAIL;
+							}
 						}
+						moveBlock(&block, 1, 0);
+						break;
+					case KEY_UP:
+						rotateBlock(&block);
+						break;
 					}
-					moveBlock(&block, 1, 0);
-					break;
-				case KEY_UP:
-					rotateBlock(&block);
-					break;
 				}
 			}
+
+			FAIL:;
+			/* 키보드 입력받는 부분 끝*/
+
+			if (block.nFrame <= 0) {
+
+				moveBlock(&block, 0, 1);
+				gotoxy(17, 27);
+				block.nFrame = FRAME_PER_SEC;
+				printf("%03d", block.nFrame);
+			}
+
+			gotoxy(0, 0);
+			block.nFrame--;
+			Sleep(1000 / FRAME_PER_SEC);
 		}
+		/* 블럭 드랍이 끝나면 map[][]을 1로 수정*/
+		for (int i = 0; i < BLOCK_SIZE; i++) 
+			map[block.blockPoint[i].y][block.blockPoint[i].x] = 1;
+		
 
-	FAIL:;
-		/* 키보드 입력받는 부분 끝*/
+		/* 없어지는 줄 있는지 검사 */
 
-		if (block.nFrame <= 0) {
 
-			moveBlock(&block, 0, 1);
-			gotoxy(17, 27);
-			block.nFrame = FRAME_PER_SEC;
-			printf("%03d", block.nFrame);
-		}
-
-		gotoxy(0, 0);
-		block.nFrame--;
-		Sleep(1000 / FRAME_PER_SEC);
 	}
-
 	return 0;
 }
