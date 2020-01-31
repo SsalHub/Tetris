@@ -34,8 +34,8 @@ typedef struct {
 	short nFrame = 0;				// 떨어지는 속도.
 } BLOCK;
 
-void setMap();
-void printMap();
+void setMap(void);
+void printMap(void);
 void setBlock(BLOCK* pBlock);
 void setPoint(POINT* pPoint, int x, int y);
 void removeBlock(BLOCK* pBlock);
