@@ -76,7 +76,7 @@ void setPoint(POINT* pPoint, int x, int y) {		// 블럭의 x, y좌표 값을 입력받은 �
 }
 
 void removeBlock(BLOCK* pBlock) {		// 출력된 블럭의 좌표에 공백을 덮어씌워 지운다.
-	removeBlockPrev(pBlock);		// 미리보기 블럭 제거
+	//removeBlockPrev(pBlock);		// 미리보기 블럭 제거
 	for (int i = 0; i < BLOCK_SIZE; i++) {
 		if ((0 < pBlock->blockPoint[i].x && pBlock->blockPoint[i].x < WIDTH - 1) && (0 < pBlock->blockPoint[i].y && pBlock->blockPoint[i].y < HEIGHT - 1)) {   // map의 테두리가 아닐 경우에만
 			gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y);
@@ -127,7 +127,7 @@ void rotateBlock(BLOCK* pBlock) {
 }
 
 void putBlock(BLOCK* pBlock) { // 저장된 좌표로 이동하여 블럭을 출력함.
-	putBlockPrev(pBlock);
+	//putBlockPrev(pBlock);
 	for (int i = 0; i < BLOCK_SIZE; i++) {
 		gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y);
 		printf("■");
