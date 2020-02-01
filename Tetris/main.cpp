@@ -6,6 +6,8 @@
 
 bool map[HEIGHT][WIDTH] = { 0 };
 
+typedef enum { KS_UP, KS_DOWN, KS_LEFT, KS_RIGHT, KS_SPACE } KeyState;
+
 int main() {
 	srand((unsigned int)time(NULL));
 	system("mode con cols=80 lines=30");		// 프롬프트 창 크기 조절
@@ -13,6 +15,8 @@ int main() {
 	setMap();
 	printMap();
 
+	int key_nFrame[5] = { 0 };		// 키입력 종류(상하좌우 + 스페이스바)
+	int keyState;
 	BLOCK block;
 	gotoxy(2, 27);
 	printf("block.nFrame = ");
@@ -28,42 +32,72 @@ int main() {
 			printf("%03d", block.nFrame);
 		
 			/* 키보드 입력받는 부분 */
-			if (_kbhit()) {
-				switch (_getch()) {
-				case KEY_SPACE:
-					moveBlock(&block, 0, block.deltaY);
-					break;
-				case ARROW_KEY_DEFAULT:
-					switch (_getch()) {
-					case KEY_DOWN:
-						moveBlock(&block, 0, 1);
-						block.nFrame = FRAME_PER_SEC;
-						break;
-					case KEY_LEFT:
-						for (int i = 0; i < BLOCK_SIZE; i++) {
-							if (block.blockPoint[i].x - 1 <= 0) {
-								goto FAIL;
-							}
+		
+			keyState = GetAsyncKeyState(VK_UP);
+			if (keyState & 0x8000) {
+				if (key_nFrame[KS_UP] != 1) {
+					rotateBlock(&block);
+				}
+				key_nFrame[KS_UP] = 1;
+			}
+			else
+				key_nFrame[KS_UP] = 0;
+
+			keyState = GetAsyncKeyState(VK_DOWN);
+			if (keyState & 0x8000) {
+				if (key_nFrame[KS_DOWN] % 5 == 0) {
+					moveBlock(&block, 0, 1);
+					block.nFrame = FRAME_PER_SEC;
+				}
+				key_nFrame[KS_DOWN]++;
+			}
+			else 
+				key_nFrame[KS_DOWN] = 0;
+
+			keyState = GetAsyncKeyState(VK_LEFT);
+			if (keyState & 0x8000) {
+				if (key_nFrame[KS_LEFT] % 10 == 0) {
+					for (int i = 0; i < BLOCK_SIZE; i++) {
+						if (block.blockPoint[i].x - 1 <= 0) {
+							break;
 						}
-						moveBlock(&block, -1, 0);
-						break;
-					case KEY_RIGHT:
-						for (int i = 0; i < BLOCK_SIZE; i++) {
-							if (WIDTH - 1 <= block.blockPoint[i].x + 1) {
-								goto FAIL;
-							}
-						}
-						moveBlock(&block, 1, 0);
-						break;
-					case KEY_UP:
-						rotateBlock(&block);
-						break;
+						if (i == BLOCK_SIZE - 1)
+							moveBlock(&block, -1, 0);
 					}
 				}
+				key_nFrame[KS_LEFT]++;
+			}
+			else {
+				key_nFrame[KS_LEFT] = 0;
+				keyState = GetAsyncKeyState(VK_RIGHT);
+				if (keyState & 0x8000) {
+					if (key_nFrame[KS_RIGHT] % 10 == 0) {
+						for (int i = 0; i < BLOCK_SIZE; i++) {
+							if (WIDTH - 1 <= block.blockPoint[i].x + 1) {
+								break;
+							}
+							if(i == BLOCK_SIZE - 1)
+								moveBlock(&block, 1, 0);
+						}
+					}
+					key_nFrame[KS_RIGHT]++;
+				}
+				else
+					key_nFrame[KS_RIGHT] = 0;
 			}
 
-			FAIL:;
+			keyState = GetAsyncKeyState(VK_SPACE);
+			if (keyState & 0x8000) {
+				if (key_nFrame[KS_SPACE] != 1) {
+					moveBlock(&block, 0, block.deltaY);
+				}
+				key_nFrame[KS_SPACE] = 1;		// SPACE키가 눌린 상태라면, 최초 한번만 동작하고 뗄 떼까지 미동작
+			}
+			else
+				key_nFrame[KS_SPACE] = 0;		// SPACE키가 떼어졌을 때에 다시 초기값으로 돌림
+
 			/* 키보드 입력받는 부분 끝*/
+
 
 			if (block.nFrame <= 0) {
 
@@ -77,6 +111,7 @@ int main() {
 			block.nFrame--;
 			Sleep(1000 / FRAME_PER_SEC);
 		}
+
 		/* 블럭 드랍이 끝나면 map[][]을 1로 수정*/
 		for (int i = 0; i < BLOCK_SIZE; i++) 
 			map[block.blockPoint[i].y][block.blockPoint[i].x] = 1;
