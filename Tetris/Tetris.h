@@ -14,7 +14,7 @@
 #define WIDTH 12					// 맵의 너비
 #define HEIGHT 27					// 맵의 높이
 #define BLOCK_SIZE 4				// 블록 하나에 포함되는 작은 블록의 갯수(모두 4개)
-#define FRAME_PER_SEC 240		// 테트리스의 fps. 초당 240회의 연산을 하도록 고정 (고정 안할 시 초당 n천회 이상)
+#define FRAME_PER_SEC 240			// 테트리스의 fps. 초당 240회의 연산을 하도록 고정 (고정 안할 시 초당 n천회 이상)
 #define ARROW_KEY_DEFAULT 224		// 방향키를 입력받을 때, 방향키의 ASCII값에 앞서 입력되는 ASCII값
 #define KEY_LEFT 75
 #define KEY_RIGHT 77
@@ -50,6 +50,7 @@ void rotateBlockPoint(BLOCK* pBlock);
 void rotateBlock(BLOCK* pBlock);
 int getDeltaY(BLOCK* pBlock);
 int getDeltaXfromSide(BLOCK* pBlock);
+int getKey(void);
 void gotoxy(int x, int y);
 
 #endif		// #ifndef문 종료
