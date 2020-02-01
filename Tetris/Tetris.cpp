@@ -23,6 +23,11 @@ void printMap() {		// 초기화된 맵 출력
 	}
 }
 
+void setPoint(POINT* pPoint, int x, int y) {		// 블럭의 x, y좌표 값을 입력받은 대로 연산.
+	pPoint->x = x;
+	pPoint->y = y;
+}
+
 void setBlock(BLOCK* pBlock) {		// 블럭 의 속성값 초기화.
 	POINT* point = pBlock->blockPoint;
 	setPoint(point, 2 * 3, -1);	// 블럭의 중심점을 (2 * 3, -1)으로 초기화.
@@ -70,21 +75,6 @@ void setBlock(BLOCK* pBlock) {		// 블럭 의 속성값 초기화.
 	pBlock->deltaY = getDeltaY(pBlock);
 }
 
-void setPoint(POINT* pPoint, int x, int y) {		// 블럭의 x, y좌표 값을 입력받은 대로 연산.
-	pPoint->x = x;
-	pPoint->y = y;
-}
-
-void removeBlock(BLOCK* pBlock) {		// 출력된 블럭의 좌표에 공백을 덮어씌워 지운다.
-	removeBlockPrev(pBlock);		// 미리보기 블럭 제거
-	for (int i = 0; i < BLOCK_SIZE; i++) {
-		if ((0 < pBlock->blockPoint[i].x && pBlock->blockPoint[i].x < WIDTH - 1) && (0 < pBlock->blockPoint[i].y && pBlock->blockPoint[i].y < HEIGHT - 1)) {   // map의 테두리가 아닐 경우에만
-			gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y);
-			printf("  ");	// 기존의 ■를 지우기 위해 공백 출력
-		}
-	}
-}
-
 void moveBlockPoint(BLOCK* pBlock, int x, int y) { // 블럭의 모든 점의 좌표를 (x, y)만큼 옮긴다.
 	for (int i = 0; i < BLOCK_SIZE; i++) {
 		pBlock->blockPoint[i].x += x;
@@ -127,7 +117,7 @@ void rotateBlock(BLOCK* pBlock) {
 }
 
 void putBlock(BLOCK* pBlock) { // 저장된 좌표로 이동하여 블럭을 출력함.
-	putBlockPrev(pBlock);
+	//putBlockPrev(pBlock);
 	for (int i = 0; i < BLOCK_SIZE; i++) {
 		gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y);
 		printf("■");
@@ -141,16 +131,21 @@ void putBlockPrev(BLOCK* pBlock) {		// 드랍 중인 블록의 미리보기 출력.
 	}
 }
 
+void removeBlock(BLOCK* pBlock) {		// 출력된 블럭의 좌표에 공백을 덮어씌워 지운다.
+	//removeBlockPrev(pBlock);		// 미리보기 블럭 제거
+	for (int i = 0; i < BLOCK_SIZE; i++) {
+		if ((0 < pBlock->blockPoint[i].x && pBlock->blockPoint[i].x < WIDTH - 1) && (0 < pBlock->blockPoint[i].y && pBlock->blockPoint[i].y < HEIGHT - 1)) {   // map의 테두리가 아닐 경우에만
+			gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y);
+			printf("  ");	// 기존의 ■를 지우기 위해 공백 출력
+		}
+	}
+}
+
 void removeBlockPrev(BLOCK* pBlock) {		// 미리보기 위에 공백을 출력하여 덮어씌움.
 	for (int i = 0; i < BLOCK_SIZE; i++) {
 		gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y + pBlock->deltaY);
 		printf("  ");
 	}
-}
-
-void gotoxy(int x, int y) {		// 커서를 해당 좌표로 이동
-	COORD Cur = { x, y };
-	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), Cur);
 }
 
 int getDeltaY(BLOCK* pBlock) {	// 떨어지는 블럭과 바닥 간의 거리를 리턴하는 함수.
@@ -189,4 +184,9 @@ int getDeltaXfromSide(BLOCK* pBlock) {
 		}
 	}
 	return deltaX;
+}
+
+void gotoxy(int x, int y) {		// 커서를 해당 좌표로 이동
+	COORD Cur = { x, y };
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), Cur);
 }

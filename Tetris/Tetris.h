@@ -27,6 +27,8 @@
 
 typedef enum { BLOCK_I, BLOCK_O, BLOCK_Z, BLOCK_S, BLOCK_J, BLOCK_L, BLOCK_T } TYPE; // 블럭의 종류(7가지)를 열거형으로 정의.
 
+typedef enum { KS_UP, KS_DOWN, KS_LEFT, KS_RIGHT, KS_SPACE } KeyState;		// 각 키가 입력될 때에 동작을 제어하기 위한 고유값들을 열거형으로 정의. KS = KeyState
+
 typedef struct {
 	TYPE blockType;
 	POINT blockPoint[4];			// 배열의 첫 요소가 기준점.
@@ -36,18 +38,18 @@ typedef struct {
 
 void setMap(void);
 void printMap(void);
-void setBlock(BLOCK* pBlock);
 void setPoint(POINT* pPoint, int x, int y);
-void removeBlock(BLOCK* pBlock);
+void setBlock(BLOCK* pBlock);
 void moveBlockPoint(BLOCK* pBlock, int x, int y);
 void moveBlock(BLOCK* pBlock, int x, int y);
-void rotateBlockPoint(BLOCK* pBlock);
-void rotateBlock(BLOCK* pBlock);
 void putBlock(BLOCK* pBlock);
 void putBlockPrev(BLOCK* pBlock);
+void removeBlock(BLOCK* pBlock);
 void removeBlockPrev(BLOCK* pBlock);
-void gotoxy(int x, int y);
+void rotateBlockPoint(BLOCK* pBlock);
+void rotateBlock(BLOCK* pBlock);
 int getDeltaY(BLOCK* pBlock);
 int getDeltaXfromSide(BLOCK* pBlock);
+void gotoxy(int x, int y);
 
 #endif		// #ifndef문 종료
