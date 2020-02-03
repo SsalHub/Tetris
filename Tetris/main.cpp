@@ -50,7 +50,7 @@ int main() {
 				moveBlock(&block, 0, block.deltaY);
 				block.nFrame = FRAME_PER_SEC;
 			}
-			pressed(0, &anyButton); // 어떤 버튼도 눌리지 않았다면
+			pressed(0, &anyButton);
 
 			/* 키보드 입력받는 부분 끝*/
 

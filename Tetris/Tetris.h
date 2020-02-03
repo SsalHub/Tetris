@@ -41,6 +41,7 @@ void setMap(void);
 void printMap(void);
 void setPoint(POINT* pPoint, int x, int y);
 void setBlock(BLOCK* pBlock);
+bool pressed(int key, int* anyButton);
 bool isBlocked(BLOCK* pBlock, int x);
 void moveBlockPoint(BLOCK* pBlock, int x, int y);
 void moveBlock(BLOCK* pBlock, int x, int y);
@@ -52,7 +53,6 @@ void rotateBlockPoint(BLOCK* pBlock);
 void rotateBlock(BLOCK* pBlock);
 int getDeltaY(BLOCK* pBlock);
 int getDeltaXfromSide(BLOCK* pBlock);
-bool pressed(int key, int* anyButton);
 void gotoxy(int x, int y);
 
 #endif		// #ifndef¹® Á¾·á

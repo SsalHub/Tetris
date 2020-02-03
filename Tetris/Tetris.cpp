@@ -116,6 +116,42 @@ void rotateBlockPoint(BLOCK* pBlock) { // 블럭을 회전시키는 함수.
 	}
 }
 
+bool pressed(int key, int* anyButton) {
+	static int key_nFrame[5]; // key_nFrame은 직전 키 눌림 여부나 눌린 횟수.(frame)
+	const int downFrame = 5, moveFrame = 10; // down / left, right를 실행할 프레임 주기.
+	const int keyPressCheck = 0x8000;
+
+	// key가 0일 때 anyButton도 0이면 key_nFrame을 모두 0으로 초기화.
+	if (!key) {
+		if (!*anyButton)
+			for (int i = 0; i < KEY_COUNT; i++)
+				key_nFrame[i] = 0;
+		return 0;
+	}
+
+	// key가 눌리지 않았으면 0 리턴.
+	if (!(GetAsyncKeyState(key) & keyPressCheck)) return 0;
+	*anyButton = true;
+
+	static bool ret[2];
+	switch (key) {
+	case VK_UP: // 이전 key_nFrame 값이 0이어야 true를 리턴.
+		ret[0] = !key_nFrame[KS_UP];
+		key_nFrame[KS_UP] = true;
+		return ret[0];
+	case VK_DOWN: // key_nframe 값이 1씩 증가하고, downFrame으로 나눈 나머지가 0이면 true 리턴.
+		return !(++key_nFrame[KS_DOWN] % downFrame);
+	case VK_LEFT:
+		return !(++key_nFrame[KS_LEFT] % moveFrame);
+	case VK_RIGHT:
+		return !(++key_nFrame[KS_RIGHT] % moveFrame);
+	case VK_SPACE:
+		ret[1] = !key_nFrame[KS_SPACE];
+		key_nFrame[KS_SPACE] = true;
+		return ret[1];
+	}
+}
+
 void rotateBlock(BLOCK* pBlock) {
 	removeBlock(pBlock);
 	rotateBlockPoint(pBlock);
@@ -191,45 +227,6 @@ int getDeltaXfromSide(BLOCK* pBlock) {
 		}
 	}
 	return deltaX;
-}
-
-bool pressed(int key, int* anyButton) {
-	static int key_nFrame[5]; // key_nFrame은 직전 키 눌림 여부나 눌린 횟수.(frame)
-	const int downFrame = 5, moveFrame = 10; // down / left, right를 실행할 프레임 주기.
-	const int keyPressCheck = 0x8000;
-
-	// key가 0일 때 anyButton도 0이면 key_nFrame을 모두 0으로 초기화.
-	if (!key) {
-		if (!*anyButton)
-			for (int i = 0; i < KEY_COUNT; i++)
-				key_nFrame[i] = 0;
-		return 0;
-	}
-
-	// key가 눌리지 않았으면 0 리턴.
-	if (!(GetAsyncKeyState(key) & keyPressCheck)) return 0;
-	*anyButton = true;
-
-	static bool ret[2];
-	switch (key) {
-	case VK_UP:
-		ret[0] = !key_nFrame[KS_UP];
-		key_nFrame[KS_UP] = true;
-		return ret[0];
-	case VK_DOWN:
-		key_nFrame[KS_DOWN]++;
-		return !(key_nFrame[KS_DOWN] % downFrame);
-	case VK_LEFT:
-		key_nFrame[KS_LEFT]++;
-		return !(key_nFrame[KS_LEFT] % moveFrame);
-	case VK_RIGHT:
-		key_nFrame[KS_RIGHT]++;
-		return !(key_nFrame[KS_RIGHT] % moveFrame);
-	case VK_SPACE:
-		ret[1] = !key_nFrame[KS_SPACE];
-		key_nFrame[KS_SPACE] = true;
-		return ret[1];
-	}
 }
 
 void gotoxy(int x, int y) {		// 커서를 해당 좌표로 이동
