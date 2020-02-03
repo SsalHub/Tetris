@@ -75,47 +75,6 @@ void setBlock(BLOCK* pBlock) {		// 블럭 의 속성값 초기화.
 	pBlock->deltaY = getDeltaY(pBlock);
 }
 
-bool isBlocked(BLOCK* pBlock, int x) {
-	for (int i = 0; i < BLOCK_SIZE; i++)
-		if (map[pBlock->blockPoint[i].y][pBlock->blockPoint[i].x + x])
-			return true;
-	return false;
-}
-
-void moveBlockPoint(BLOCK* pBlock, int x, int y) { // 블럭의 모든 점의 좌표를 (x, y)만큼 옮긴다.
-	for (int i = 0; i < BLOCK_SIZE; i++) {
-		pBlock->blockPoint[i].x += x;
-		pBlock->blockPoint[i].y += y;
-	}
-}
-
-void moveBlock(BLOCK* pBlock, int x, int y) {
-	removeBlock(pBlock);
-	moveBlockPoint(pBlock, x, y);
-	pBlock->deltaY = getDeltaY(pBlock);
-	putBlock(pBlock);
-}
-
-void rotateBlockPoint(BLOCK* pBlock) { // 블럭을 회전시키는 함수.
-	POINT* point = pBlock->blockPoint;
-
-	if (pBlock->blockType == BLOCK_O) {
-		return;
-	}
-
-	for (int i = 0; i < BLOCK_SIZE; i++) {
-		int delta_x = point[i].x - point[0].x;
-		int delta_y = point[i].y - point[0].y;
-		setPoint(&point[i], point[0].x - delta_y, point[0].y + delta_x);
-	}
-
-	int deltaX = getDeltaXfromSide(pBlock);
-	if (deltaX) {
-		/* 튀어나온 거리만큼 x좌표 변경 */
-		moveBlockPoint(pBlock, -deltaX, 0);
-	}
-}
-
 bool pressed(int key, int* anyButton) {
 	static int key_nFrame[5]; // key_nFrame은 직전 키 눌림 여부나 눌린 횟수.(frame)
 	const int downFrame = 5, moveFrame = 10; // down / left, right를 실행할 프레임 주기.
@@ -149,6 +108,48 @@ bool pressed(int key, int* anyButton) {
 		ret[1] = !key_nFrame[KS_SPACE];
 		key_nFrame[KS_SPACE] = true;
 		return ret[1];
+	}
+}
+
+bool isBlocked(BLOCK* pBlock, int x) {
+	for (int i = 0; i < BLOCK_SIZE; i++)
+		if (map[pBlock->blockPoint[i].y][pBlock->blockPoint[i].x + x])
+			return true;
+	return false;
+}
+
+void moveBlockPoint(BLOCK* pBlock, int x, int y) { // 블럭의 모든 점의 좌표를 (x, y)만큼 옮긴다.
+	for (int i = 0; i < BLOCK_SIZE; i++) {
+		pBlock->blockPoint[i].x += x;
+		pBlock->blockPoint[i].y += y;
+	}
+}
+
+void moveBlock(BLOCK* pBlock, int x, int y) {
+	removeBlock(pBlock);
+	moveBlockPoint(pBlock, x, y);
+	pBlock->deltaY = getDeltaY(pBlock);
+	putBlock(pBlock);
+}
+
+
+void rotateBlockPoint(BLOCK* pBlock) { // 블럭을 회전시키는 함수.
+	POINT* point = pBlock->blockPoint;
+
+	if (pBlock->blockType == BLOCK_O) {
+		return;
+	}
+
+	for (int i = 0; i < BLOCK_SIZE; i++) {
+		int delta_x = point[i].x - point[0].x;
+		int delta_y = point[i].y - point[0].y;
+		setPoint(&point[i], point[0].x - delta_y, point[0].y + delta_x);
+	}
+
+	int deltaX = getDeltaXfromSide(pBlock);
+	if (deltaX) {
+		/* 튀어나온 거리만큼 x좌표 변경 */
+		moveBlockPoint(pBlock, -deltaX, 0);
 	}
 }
 
