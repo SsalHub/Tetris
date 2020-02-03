@@ -75,6 +75,13 @@ void setBlock(BLOCK* pBlock) {		// 블럭 의 속성값 초기화.
 	pBlock->deltaY = getDeltaY(pBlock);
 }
 
+bool isBlocked(BLOCK* pBlock, int x) {
+	for (int i = 0; i < BLOCK_SIZE; i++)
+		if (map[pBlock->blockPoint[i].y][pBlock->blockPoint[i].x + x])
+			return true;
+	return false;
+}
+
 void moveBlockPoint(BLOCK* pBlock, int x, int y) { // 블럭의 모든 점의 좌표를 (x, y)만큼 옮긴다.
 	for (int i = 0; i < BLOCK_SIZE; i++) {
 		pBlock->blockPoint[i].x += x;
@@ -186,68 +193,42 @@ int getDeltaXfromSide(BLOCK* pBlock) {
 	return deltaX;
 }
 
-int getKey() {
-	static int key_nFrame[5];
-	// 윗 방향키는 오래 누르더라도 최초 입력 시점에만 블럭이 회전함
-	int key = -1;
+bool pressed(int key, int* anyButton) {
+	static int key_nFrame[5]; // key_nFrame은 직전 키 눌림 여부나 눌린 횟수.(frame)
+	const int downFrame = 5, moveFrame = 10; // down / left, right를 실행할 프레임 주기.
+	const int keyPressCheck = 0x8000;
 
-	int keyState = GetAsyncKeyState(VK_UP);		// '윗 방향키가 입력되었는가?' 에 대한 값을 받아옴
-	if (keyState & 0x8000) {		// 윗 방향키가 입력되었다면 ~
-		if (key_nFrame[KS_UP] != 1) {		// 윗 방향키가 계속 눌려있는 상태가 아니었다면 ~ 
-			key = VK_UP;
-		}
-		key_nFrame[KS_UP] = 1;		// 계속 눌려있는 상태를 뜻하는 1로 값 변경
-	}
-	else {		// 윗 방향키가 입력되지 않았다면
-		key_nFrame[KS_UP] = 0;		// 눌려있지 않은 상태를 뜻하는 0으로 값 변경
-	}
+	// key가 0일 때 anyButton도 0이면 key_nFrame을 모두 0으로 초기화.
+	if (!key)
+		if (!*anyButton)
+			for (int i = 0; i < KEY_COUNT; i++)
+				key_nFrame[i] = 0;
+		else return 0;
 
-	// 아래 방향키는 오래 누른 만큼 블럭이 내려감
-	keyState = GetAsyncKeyState(VK_DOWN);		// '아래 방향키가 입력되었는가' 에 대한 값을 받아옴
-	if (keyState & 0x8000) {		// 아래 방향키가 입력되었다면 ~
-		if (key_nFrame[KS_DOWN] % 5 == 0) {		// 5프레임마다 동작
-			key = VK_DOWN;
-		}
-		key_nFrame[KS_DOWN]++;		// 누른 시간만큼 프레임 값을 1씩 더함
-	}
-	else {		// 아래 방향키가 입력되지 않았다면
-		key_nFrame[KS_DOWN] = 0;		// 프레임 값을 다시 0으로 초기화
-	}
+	// key가 눌리지 않았으면 0 리턴.
+	if (!(GetAsyncKeyState(key) & keyPressCheck)) return 0;
+	*anyButton = true;
 
-	// 좌우 방향키는 오래 누른 만큼 블럭이 이동
-	keyState = GetAsyncKeyState(VK_LEFT);
-	if (keyState & 0x8000) {	// 왼쪽 방향키가 입력되었다면
-		if (key_nFrame[KS_LEFT] % 10 == 0) {
-			key = VK_LEFT;
-		}
+	static bool ret[2];
+	switch (key) {
+	case VK_UP:
+		ret[0] = !key_nFrame[KS_UP];
+		key_nFrame[KS_UP] = true;
+		return ret[0];
+	case VK_DOWN:
+		key_nFrame[KS_DOWN]++;
+		return !(key_nFrame[KS_DOWN] % downFrame);
+	case VK_LEFT:
 		key_nFrame[KS_LEFT]++;
+		return !(key_nFrame[KS_LEFT] % moveFrame);
+	case VK_RIGHT:
+		key_nFrame[KS_RIGHT]++;
+		return !(key_nFrame[KS_RIGHT] % moveFrame);
+	case VK_SPACE:
+		ret[1] = !key_nFrame[KS_SPACE];
+		key_nFrame[KS_SPACE] = true;
+		return ret[1];
 	}
-	else {		// 왼쪽 방향키가 입력되지 않았다면
-		key_nFrame[KS_LEFT] = 0;
-		keyState = GetAsyncKeyState(VK_RIGHT);
-		if (keyState & 0x8000) {		// 오른쪽 방향키가 입력되었다면
-			if (key_nFrame[KS_RIGHT] % 10 == 0) {
-				key = VK_RIGHT;
-			}
-			key_nFrame[KS_RIGHT]++;
-		}
-		else {	// 오른쪽 방향키가 입력되지 않았다면
-			key_nFrame[KS_RIGHT] = 0;
-		}
-	}
-
-	// 스페이스바는 오래 누르더라도 최초 입력 시점에만 블럭이 떨어짐
-	keyState = GetAsyncKeyState(VK_SPACE);
-	if (keyState & 0x8000) {
-		if (key_nFrame[KS_SPACE] != 1) {
-			key = VK_SPACE;
-		}
-		key_nFrame[KS_SPACE] = 1;		// 윗 방향키와 같은 방식으로 제어. 1 = 키가 눌려있는 상태
-	}
-	else
-		key_nFrame[KS_SPACE] = 0;		// 0 = 키가 눌려있지 않은 상태
-
-	return key;
 }
 
 void gotoxy(int x, int y) {		// 커서를 해당 좌표로 이동

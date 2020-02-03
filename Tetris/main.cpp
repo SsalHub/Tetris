@@ -16,6 +16,7 @@ int main() {
 	BLOCK block;
 	gotoxy(2, 27);
 	printf("block.nFrame = ");
+	int key_nFrame[5];
 
 	while (1) {	// 게임 오버까지
 
@@ -28,44 +29,33 @@ int main() {
 			printf("%03d", block.nFrame);
 
 			/* 키보드 입력받는 부분 */
-
-			switch (getKey()) {
-			case VK_UP:
+			
+			int anyButton = false; // 한 버튼이라도 눌렸는지 여부.
+			if (pressed(VK_UP, &anyButton)) {
 				rotateBlock(&block);
-				break;
-			case VK_DOWN:
+			}
+			if (pressed(VK_DOWN, &anyButton)) {
 				moveBlock(&block, 0, 1);
 				block.nFrame = FRAME_PER_SEC;
-				break;
-			case VK_LEFT:
-				for (int i = 0; i < BLOCK_SIZE; i++) {
-					if (map[block.blockPoint[i].y][block.blockPoint[i].x - 1] == 1) {
-						break;
-					}
-					if (i == BLOCK_SIZE - 1)
-						moveBlock(&block, -1, 0);
-				}
-				break;
-			case VK_RIGHT:
-					for (int i = 0; i < BLOCK_SIZE; i++) {
-						if (map[block.blockPoint[i].y][block.blockPoint[i].x - 1] == 1) {
-							break;
-						}
-						if (i == BLOCK_SIZE - 1)
-							moveBlock(&block, 1, 0);
-					}
-					break;
-			case VK_SPACE:
+			}
+			if (pressed(VK_LEFT, &anyButton)) {
+				if (!isBlocked(&block, -1))
+					moveBlock(&block, -1, 0);
+			}
+			if (pressed(VK_RIGHT, &anyButton)) {
+				if (!isBlocked(&block, 1))
+					moveBlock(&block, 1, 0);
+			}
+			if (pressed(VK_SPACE, &anyButton)) {
 				moveBlock(&block, 0, block.deltaY);
 				block.nFrame = FRAME_PER_SEC;
-				break;
 			}
+			pressed(0, &anyButton); // 어떤 버튼도 눌리지 않았다면
 
 			/* 키보드 입력받는 부분 끝*/
 
 
 			if (block.nFrame <= 0) {
-
 				moveBlock(&block, 0, 1);
 				gotoxy(17, 27);
 				block.nFrame = FRAME_PER_SEC;

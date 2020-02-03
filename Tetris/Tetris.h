@@ -21,6 +21,7 @@
 #define KEY_UP 72
 #define KEY_DOWN 80
 #define KEY_SPACE 32
+#define KEY_COUNT 5
 
 #define GET_MAX(n1, n2) ((n1) > (n2) ? (n1) : (n2))		// 더 큰 수를 계산하는 매크로 함수
 #define GET_MIN(n1, n2) ((n1) < (n2) ? (n1) : (n2))		// 더 작은 수를 계산하는 매크로 함수
@@ -40,6 +41,7 @@ void setMap(void);
 void printMap(void);
 void setPoint(POINT* pPoint, int x, int y);
 void setBlock(BLOCK* pBlock);
+bool isBlocked(BLOCK* pBlock, int x);
 void moveBlockPoint(BLOCK* pBlock, int x, int y);
 void moveBlock(BLOCK* pBlock, int x, int y);
 void putBlock(BLOCK* pBlock);
@@ -50,7 +52,7 @@ void rotateBlockPoint(BLOCK* pBlock);
 void rotateBlock(BLOCK* pBlock);
 int getDeltaY(BLOCK* pBlock);
 int getDeltaXfromSide(BLOCK* pBlock);
-int getKey(void);
+bool pressed(int key, int* anyButton);
 void gotoxy(int x, int y);
 
 #endif		// #ifndef문 종료
