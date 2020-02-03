@@ -80,34 +80,30 @@ bool pressed(int key, int* anyButton) {
 	const int downFrame = 5, moveFrame = 10; // down / left, right를 실행할 프레임 주기.
 	const int keyPressCheck = 0x8000;
 
-	// key가 0일 때 anyButton도 0이면 key_nFrame을 모두 0으로 초기화.
-	if (!key) {
-		if (!*anyButton)
+	if (key) {
+		if (!(GetAsyncKeyState(key) & keyPressCheck)) // 입력되지 않았으면 바로 false 리턴.
+			return false;
+		
+		*anyButton = true;
+		// down, left, right에서 ++이 후위 연산자면 첫 입력 실행, 전위 연산자면 첫 입력 실행X.
+		switch (key) {
+		case VK_UP: // 이전 key_nFrame 값이 0이어야 true를 리턴.
+			return !key_nFrame[KS_UP]++;
+		case VK_DOWN: // key_nframe 값이 1씩 증가하고, downFrame으로 나눈 나머지가 0이면 true 리턴.
+			return !(++key_nFrame[KS_DOWN] % downFrame);
+		case VK_LEFT:
+			return !(++key_nFrame[KS_LEFT] % moveFrame);
+		case VK_RIGHT:
+			return !(++key_nFrame[KS_RIGHT] % moveFrame);
+		case VK_SPACE:
+			return !key_nFrame[KS_SPACE]++;
+		}
+	}
+	else {
+		if (!*anyButton) // key가 0일 때 anyButton도 0이면 key_nFrame을 모두 0으로 초기화.
 			for (int i = 0; i < KEY_COUNT; i++)
 				key_nFrame[i] = 0;
-		return 0;
-	}
-
-	// key가 눌리지 않았으면 0 리턴.
-	if (!(GetAsyncKeyState(key) & keyPressCheck)) return 0;
-	*anyButton = true;
-
-	static bool ret[2];
-	switch (key) {
-	case VK_UP: // 이전 key_nFrame 값이 0이어야 true를 리턴.
-		ret[0] = !key_nFrame[KS_UP];
-		key_nFrame[KS_UP] = true;
-		return ret[0];
-	case VK_DOWN: // key_nframe 값이 1씩 증가하고, downFrame으로 나눈 나머지가 0이면 true 리턴.
-		return !(++key_nFrame[KS_DOWN] % downFrame);
-	case VK_LEFT:
-		return !(++key_nFrame[KS_LEFT] % moveFrame);
-	case VK_RIGHT:
-		return !(++key_nFrame[KS_RIGHT] % moveFrame);
-	case VK_SPACE:
-		ret[1] = !key_nFrame[KS_SPACE];
-		key_nFrame[KS_SPACE] = true;
-		return ret[1];
+		return false;
 	}
 }
 
