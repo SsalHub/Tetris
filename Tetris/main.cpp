@@ -30,7 +30,7 @@ int main() {
 
 			/* 키보드 입력받는 부분 */
 			
-			int anyButton = false; // 한 버튼이라도 눌렸는지 여부.
+			int anyButton = false; // 버튼이 하나라도 눌렸는지
 			if (pressed(VK_UP, &anyButton)) {
 				rotateBlock(&block);
 			}

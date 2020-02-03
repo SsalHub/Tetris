@@ -199,11 +199,12 @@ bool pressed(int key, int* anyButton) {
 	const int keyPressCheck = 0x8000;
 
 	// key가 0일 때 anyButton도 0이면 key_nFrame을 모두 0으로 초기화.
-	if (!key)
+	if (!key) {
 		if (!*anyButton)
 			for (int i = 0; i < KEY_COUNT; i++)
 				key_nFrame[i] = 0;
-		else return 0;
+		return 0;
+	}
 
 	// key가 눌리지 않았으면 0 리턴.
 	if (!(GetAsyncKeyState(key) & keyPressCheck)) return 0;
