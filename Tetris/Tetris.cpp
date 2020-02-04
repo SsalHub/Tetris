@@ -3,7 +3,6 @@ extern bool map[HEIGHT][WIDTH];
 
 void setMap() {		// 맵 초기화(테두리 생성).
 	for (int i = 0; i < WIDTH; i++) {
-		map[0][i] = 1;
 		map[HEIGHT - 1][i] = 1;
 	}
 	for (int i = 0; i < HEIGHT - 2; i++) {
@@ -31,7 +30,7 @@ void setPoint(POINT* pPoint, int x, int y) {		// 블럭의 x, y좌표 값을 입력받은 �
 void setBlock(BLOCK* pBlock) {		// 블럭 의 속성값 초기화.
 	POINT* point = pBlock->blockPoint;
 	setPoint(point, 2 * 3, -1);	// 블럭의 중심점을 (2 * 3, -1)으로 초기화.
-
+	
 	pBlock->blockType = (TYPE)(rand() % 7);
 	// 하나의 블럭을 구성하는 4개의 작은 블럭들을 중심점 기준으로 좌표 초기화. 
 	switch (pBlock->blockType) {
@@ -75,35 +74,34 @@ void setBlock(BLOCK* pBlock) {		// 블럭 의 속성값 초기화.
 	pBlock->deltaY = getDeltaY(pBlock);
 }
 
-bool pressed(int key, int* anyButton) {
+bool pressed(int key, bool* anyButton) {
 	static int key_nFrame[5]; // key_nFrame은 직전 키 눌림 여부나 눌린 횟수.(frame)
 	const int downFrame = 5, moveFrame = 10; // down / left, right를 실행할 프레임 주기.
 	const int keyPressCheck = 0x8000;
 
 	if (key) {
-		if (!(GetAsyncKeyState(key) & keyPressCheck)) // 입력되지 않았으면 바로 false 리턴.
-			return false;
-		
-		*anyButton = true;
-		// down, left, right에서 ++이 후위 연산자면 첫 입력 실행, 전위 연산자면 첫 입력 실행X.
-		switch (key) {
-		case VK_UP: // 이전 key_nFrame 값이 0이어야 true를 리턴.
-			return !key_nFrame[KS_UP]++;
-		case VK_DOWN: // key_nframe 값이 1씩 증가하고, downFrame으로 나눈 나머지가 0이면 true 리턴.
-			return !(++key_nFrame[KS_DOWN] % downFrame);
-		case VK_LEFT:
-			return !(++key_nFrame[KS_LEFT] % moveFrame);
-		case VK_RIGHT:
-			return !(++key_nFrame[KS_RIGHT] % moveFrame);
-		case VK_SPACE:
-			return !key_nFrame[KS_SPACE]++;
+		if ((GetAsyncKeyState(key) & keyPressCheck)) {
+			*anyButton = true;
+			// down, left, right에서 ++이 후위 연산자면 첫 입력 실행, 전위 연산자면 첫 입력 실행X.
+			switch (key) {
+			case VK_UP: // 이전 key_nFrame 값이 0이어야 true를 리턴.
+				return !key_nFrame[KS_UP]++;
+			case VK_DOWN: // key_nframe 값이 1씩 증가하고, downFrame으로 나눈 나머지가 0이면 true 리턴.
+				return !(++key_nFrame[KS_DOWN] % downFrame);
+			case VK_LEFT:
+				return !(++key_nFrame[KS_LEFT] % moveFrame);
+			case VK_RIGHT:
+				return !(++key_nFrame[KS_RIGHT] % moveFrame);
+			case VK_SPACE:
+				return !key_nFrame[KS_SPACE]++;
+			}
 		}
+		else return false;
 	}
 	else {
-		if (!*anyButton) // key가 0일 때 anyButton도 0이면 key_nFrame을 모두 0으로 초기화.
-			for (int i = 0; i < KEY_COUNT; i++)
-				key_nFrame[i] = 0;
-		return false;
+		for (int i = 0; i < KEY_COUNT; i++)
+			key_nFrame[i] = 0;
+		return 0;
 	}
 }
 
@@ -192,8 +190,8 @@ int getDeltaY(BLOCK* pBlock) {	// 떨어지는 블럭과 바닥 간의 거리를 리턴하는 함수
 	int deltaY = HEIGHT;		// 떨어지는 블럭과 바닥간의 거리를 저장. 최종적으로 최솟값을 얻는 것이 목표이므로 최댓값으로 초기화
 
 	for (int i = 0; i < BLOCK_SIZE; i++) {
-		for (int j = 1; j < HEIGHT; j++) {		// map의 맨 위부터 블록이 쌓여있는 위치를 탐색
-			if (map[j + 1][pBlock->blockPoint[i].x] == 1) {		// 쌓여있는 위치를 찾았다면 
+		for (int j = pBlock->blockPoint[i].y; j < HEIGHT; j++) {		// map의 맨 위부터 블록이 쌓여있는 위치를 탐색
+			if (map[j + 1][pBlock->blockPoint[i].x]) {		// 쌓여있는 위치를 찾았다면 
 				deltaY = GET_MIN(deltaY, j - pBlock->blockPoint[i].y);		// 현재 바닥의 y좌표 - 떨어지는 블럭의 y좌표 
 				break;
 			}

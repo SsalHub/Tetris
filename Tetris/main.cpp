@@ -16,7 +16,6 @@ int main() {
 	BLOCK block;
 	gotoxy(2, 27);
 	printf("block.nFrame = ");
-	int key_nFrame[5];
 
 	while (1) {	// 게임 오버까지
 
@@ -30,7 +29,7 @@ int main() {
 
 			/* 키보드 입력받는 부분 */
 			
-			int anyButton = false; // 버튼이 하나라도 눌렸는지
+			bool anyButton = false;
 			if (pressed(VK_UP, &anyButton)) {
 				rotateBlock(&block);
 			}
@@ -50,7 +49,8 @@ int main() {
 				moveBlock(&block, 0, block.deltaY);
 				block.nFrame = FRAME_PER_SEC;
 			}
-			pressed(0, &anyButton);
+			if (!anyButton)
+				pressed(0, &anyButton);
 
 			/* 키보드 입력받는 부분 끝*/
 
