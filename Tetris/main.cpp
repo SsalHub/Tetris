@@ -20,6 +20,11 @@ int main() {
 	printf("block.nFrame = ");
 
 	while(1){	// 게임 오버까지
+		/* map의 윗 테두리 출력 */
+		gotoxy(0, 0);	
+		for (int i = 0; i < WIDTH; i++) {
+			printf("■");
+		}
 
 		/* 블럭 생성 */
 		setBlock(&block);
@@ -31,10 +36,10 @@ int main() {
 		
 			/* 키보드 입력받는 부분 */
 		
-			// 윗 방향키는 오래 누르더라도 최초 입력 시점에만 블럭이 회전함
-			keyState = GetAsyncKeyState(VK_UP);		// '윗 방향키가 입력되었는가?' 에 대한 값을 받아옴
+			// 윗 방향키
+			keyState = GetAsyncKeyState(VK_UP);		
 			if (keyState & 0x8000) {		// 윗 방향키가 입력되었다면 ~
-				if (key_nFrame[KS_UP] != 1) {		// 윗 방향키가 계속 눌려있는 상태가 아니었다면 ~ 
+				if (key_nFrame[KS_UP] != 1) {		// 윗 방향키가 계속 눌려있는 상태가 아니라면
 					rotateBlock(&block);		// 블럭 회전
 				}
 				key_nFrame[KS_UP] = 1;		// 계속 눌려있는 상태를 뜻하는 1로 값 변경
@@ -59,7 +64,7 @@ int main() {
 			// 좌우 방향키는 오래 누른 만큼 블럭이 이동
 			keyState = GetAsyncKeyState(VK_LEFT);
 			if (keyState & 0x8000) {	// 왼쪽 방향키가 입력되었다면
-				if (key_nFrame[KS_LEFT] % 10 == 0) {
+				if (key_nFrame[KS_LEFT] % 16 == 0) {		// 14프레임에 한 번 이동
 					for (int i = 0; i < BLOCK_SIZE; i++) {
 						if (map[block.blockPoint[i].y][block.blockPoint[i].x - 1] == 1) {
 							break;
@@ -74,9 +79,9 @@ int main() {
 				key_nFrame[KS_LEFT] = 0;
 				keyState = GetAsyncKeyState(VK_RIGHT);
 				if (keyState & 0x8000) {		// 오른쪽 방향키가 입력되었다면
-					if (key_nFrame[KS_RIGHT] % 10 == 0) {
+					if (key_nFrame[KS_RIGHT] % 16 == 0) {		// 14프레임에 한 번 이동
 						for (int i = 0; i < BLOCK_SIZE; i++) {
-							if (map[block.blockPoint[i].y][block.blockPoint[i].x - 1] == 1) {
+							if (map[block.blockPoint[i].y][block.blockPoint[i].x + 1] == 1) {
 								break;
 							}
 							if (i == BLOCK_SIZE - 1)

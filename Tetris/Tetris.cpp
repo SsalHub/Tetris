@@ -3,7 +3,7 @@ extern bool map[HEIGHT][WIDTH];
 
 void setMap() {		// 맵 초기화(테두리 생성).
 	for (int i = 0; i < WIDTH; i++) {
-		map[0][i] = 1;
+		//map[0][i] = 1;
 		map[HEIGHT - 1][i] = 1;
 	}
 	for (int i = 0; i < HEIGHT - 2; i++) {
