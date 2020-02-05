@@ -71,10 +71,18 @@ int main() {
 		for (int i = 0; i < BLOCK_SIZE; i++)
 			map[block.blockPoint[i].y][block.blockPoint[i].x] = 1;
 
-
 		/* 없어지는 줄 있는지 검사 */
-
-
+		for (int i = 0; i < BLOCK_SIZE; i++) { // blockPoint가 있는 줄만 검사함.
+			bool clear = true;
+			int y = block.blockPoint[i].y;
+			for (int j = 1; j < WIDTH - 1; j++)
+				if (!map[y][j]) {
+					clear = false;
+					break;
+				}
+			if (clear) return 0; // 임시로 프로그램이 종료되게 함.
+		}
+		
 	}
 	return 0;
 }
