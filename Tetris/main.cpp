@@ -13,18 +13,11 @@ int main() {
 	setMap();
 	printMap();
 
-	int key_nFrame[5] = { 0 };		// 키입력을 제어하기 위한 배열. 사용될 키의 종류만큼 선언(상하좌우 + 스페이스바) 
-	int keyState;
 	BLOCK block;
 	gotoxy(2, 27);
 	printf("block.nFrame = ");
 
-	while(1){	// 게임 오버까지
-		/* map의 윗 테두리 출력 */
-		gotoxy(0, 0);	
-		for (int i = 0; i < WIDTH; i++) {
-			printf("■");
-		}
+	while (1) {	// 게임 오버까지
 
 		/* 블럭 생성 */
 		setBlock(&block);
@@ -33,45 +26,36 @@ int main() {
 		while (block.deltaY) {		// 블록이 맵 바닥까지 떨어질 때까지 반복
 			gotoxy(17, 27);
 			printf("%03d", block.nFrame);
-		
+
 			/* 키보드 입력받는 부분 */
-		
-			switch (getKey()) {
-			case VK_UP:
+			
+			bool anyButton = false;
+			if (pressed(VK_UP, &anyButton)) {
 				rotateBlock(&block);
-				break;
-			case VK_DOWN:
+			}
+			if (pressed(VK_DOWN, &anyButton)) {
 				moveBlock(&block, 0, 1);
 				block.nFrame = FRAME_PER_SEC;
-				break;
-			case VK_LEFT:
-				for (int i = 0; i < BLOCK_SIZE; i++) {
-					if (map[block.blockPoint[i].y][block.blockPoint[i].x - 1] == 1) {
-						break;
-					}
-					if (i == BLOCK_SIZE - 1)
-						moveBlock(&block, -1, 0);
-				}
-				break;
-			case VK_RIGHT:
-				for (int i = 0; i < BLOCK_SIZE; i++) {
-					if (map[block.blockPoint[i].y][block.blockPoint[i].x + 1] == 1) {
-						break;
-					}
-					if (i == BLOCK_SIZE - 1)
-						moveBlock(&block, 1, 0);
-				}
-				break;
-			case VK_SPACE:
+			}
+			if (pressed(VK_LEFT, &anyButton)) {
+				if (!isBlocked(&block, -1))
+					moveBlock(&block, -1, 0);
+			}
+			if (pressed(VK_RIGHT, &anyButton)) {
+				if (!isBlocked(&block, 1))
+					moveBlock(&block, 1, 0);
+			}
+			if (pressed(VK_SPACE, &anyButton)) {
 				moveBlock(&block, 0, block.deltaY);
 				block.nFrame = FRAME_PER_SEC;
-				break;
 			}
+			if (!anyButton)
+				pressed(0, &anyButton);
+
 			/* 키보드 입력받는 부분 끝*/
 
 
 			if (block.nFrame <= 0) {
-
 				moveBlock(&block, 0, 1);
 				gotoxy(17, 27);
 				block.nFrame = FRAME_PER_SEC;
@@ -84,13 +68,21 @@ int main() {
 		}
 
 		/* 블럭 드랍이 끝나면 map[][]을 1로 수정*/
-		for (int i = 0; i < BLOCK_SIZE; i++) 
+		for (int i = 0; i < BLOCK_SIZE; i++)
 			map[block.blockPoint[i].y][block.blockPoint[i].x] = 1;
-		
 
 		/* 없어지는 줄 있는지 검사 */
-
-
+		for (int i = 0; i < BLOCK_SIZE; i++) { // blockPoint가 있는 줄만 검사함.
+			bool clear = true;
+			int y = block.blockPoint[i].y;
+			for (int j = 1; j < WIDTH - 1; j++)
+				if (!map[y][j]) {
+					clear = false;
+					break;
+				}
+			if (clear) return 0; // 임시로 프로그램이 종료되게 함.
+		}
+		
 	}
 	return 0;
 }

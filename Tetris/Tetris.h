@@ -14,13 +14,14 @@
 #define WIDTH 12					// 맵의 너비
 #define HEIGHT 27					// 맵의 높이
 #define BLOCK_SIZE 4				// 블록 하나에 포함되는 작은 블록의 갯수(모두 4개)
-#define FRAME_PER_SEC 240		// 테트리스의 fps. 초당 240회의 연산을 하도록 고정 (고정 안할 시 초당 n천회 이상)
+#define FRAME_PER_SEC 240			// 테트리스의 fps. 초당 240회의 연산을 하도록 고정 (고정 안할 시 초당 n천회 이상)
 #define ARROW_KEY_DEFAULT 224		// 방향키를 입력받을 때, 방향키의 ASCII값에 앞서 입력되는 ASCII값
 #define KEY_LEFT 75
 #define KEY_RIGHT 77
 #define KEY_UP 72
 #define KEY_DOWN 80
 #define KEY_SPACE 32
+#define KEY_COUNT 5
 
 #define GET_MAX(n1, n2) ((n1) > (n2) ? (n1) : (n2))		// 더 큰 수를 계산하는 매크로 함수
 #define GET_MIN(n1, n2) ((n1) < (n2) ? (n1) : (n2))		// 더 작은 수를 계산하는 매크로 함수
@@ -38,19 +39,21 @@ typedef struct {
 
 void setMap(void);
 void printMap(void);
-void setBlock(BLOCK* pBlock);
 void setPoint(POINT* pPoint, int x, int y);
-void removeBlock(BLOCK* pBlock);
+bool isInsideMap(const POINT* pPoint);
+void setBlock(BLOCK* pBlock);
+bool pressed(int key, bool* anyButton);
+bool isBlocked(const BLOCK* pBlock, int x);
 void moveBlockPoint(BLOCK* pBlock, int x, int y);
 void moveBlock(BLOCK* pBlock, int x, int y);
-void rotateBlockPoint(BLOCK* pBlock);
-void rotateBlock(BLOCK* pBlock);
 void putBlock(BLOCK* pBlock);
 void putBlockPrev(BLOCK* pBlock);
+void removeBlock(BLOCK* pBlock);
 void removeBlockPrev(BLOCK* pBlock);
-void gotoxy(int x, int y);
+void rotateBlockPoint(BLOCK* pBlock);
+void rotateBlock(BLOCK* pBlock);
 int getDeltaY(BLOCK* pBlock);
 int getDeltaXfromSide(BLOCK* pBlock);
-int getKey();
+void gotoxy(int x, int y);
 
 #endif		// #ifndef문 종료
