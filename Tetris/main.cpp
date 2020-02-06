@@ -29,28 +29,27 @@ int main() {
 
 			/* 키보드 입력받는 부분 */
 			
-			bool anyButton = false;
-			if (pressed(VK_UP, &anyButton)) {
+			bool up, down, left, right, space;
+			getKey(&up, &down, &left, &right, &space);
+
+			if (up) {
 				rotateBlock(&block);
 			}
-			if (pressed(VK_DOWN, &anyButton)) {
+			if (down) {
 				moveBlock(&block, 0, 1);
 				block.nFrame = FRAME_PER_SEC;
 			}
-			if (pressed(VK_LEFT, &anyButton)) {
+			if (left) {
 				if (!isBlocked(&block, -1))
 					moveBlock(&block, -1, 0);
 			}
-			if (pressed(VK_RIGHT, &anyButton)) {
+			else if (right) {
 				if (!isBlocked(&block, 1))
 					moveBlock(&block, 1, 0);
 			}
-			if (pressed(VK_SPACE, &anyButton)) {
+			if (space) {
 				moveBlock(&block, 0, block.deltaY);
-				block.nFrame = FRAME_PER_SEC;
 			}
-			if (!anyButton)
-				pressed(0, &anyButton);
 
 			/* 키보드 입력받는 부분 끝*/
 
