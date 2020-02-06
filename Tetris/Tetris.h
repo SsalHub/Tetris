@@ -52,8 +52,14 @@ void removeBlock(BLOCK* pBlock);
 void removeBlockPrev(BLOCK* pBlock);
 void rotateBlockPoint(BLOCK* pBlock);
 void rotateBlock(BLOCK* pBlock);
+void lineClear(BLOCK* pBlock);
+void resetLine(int line_y);
+void dropLine(int line_y, int clear_line_cnt);
+bool isCleared(int line_y);
 int getDeltaY(BLOCK* pBlock);
 int getDeltaXfromSide(BLOCK* pBlock);
+int getBlockLowestY(BLOCK* pBlock);
+int getBlockHighestY(BLOCK* pBlock);
 void gotoxy(int x, int y);
 
 #endif		// #ifndef¹® Á¾·á

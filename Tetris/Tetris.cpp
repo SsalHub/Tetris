@@ -36,8 +36,8 @@ void setBlock(BLOCK* pBlock) {		// 블럭 의 속성값 초기화.
 	POINT* point = pBlock->blockPoint;
 	setPoint(point, 2 * 3, -1);	// 블럭의 중심점을 (2 * 3, -1)으로 초기화.
 
-	//pBlock->blockType = BLOCK_I;
-	pBlock->blockType = (TYPE)(rand() % 7);
+	pBlock->blockType = BLOCK_I;
+	//pBlock->blockType = (TYPE)(rand() % 7);
 	// 하나의 블럭을 구성하는 4개의 작은 블럭들을 중심점 기준으로 좌표 초기화. 
 	switch (pBlock->blockType) {
 	case BLOCK_O:
@@ -192,6 +192,52 @@ void removeBlockPrev(BLOCK* pBlock) {		// 미리보기 위에 공백을 출력하여 덮어씌움
 	}
 }
 
+void lineClear(BLOCK* pBlock) {
+	int cleared_cnt = 0;
+	int lowest_y = getBlockLowestY(pBlock);
+	int highest_y = getBlockHighestY(pBlock);
+	int check_line;
+
+	for (check_line = lowest_y; highest_y <= check_line; check_line--) {		// 블럭의 실제 높이만큼만 검사함
+		if (isCleared(check_line)) {		// 현재 검사하는 라인이 클리어되었다면
+			cleared_cnt++;
+			resetLine(check_line);
+		}
+		else if(cleared_cnt != 0) {		// 클리어되진 않았지만, 밑에 텅 빈 라인이 있다면
+			dropLine(check_line, cleared_cnt);
+			resetLine(check_line);
+		}
+	}
+
+	if (cleared_cnt != 0) {		// 클리어된 라인이 하나라도 존재한다면
+		for (; 1 <= check_line; check_line--) {		// 모든 남은 블럭들도 그만큼 밑으로 내림
+			dropLine(check_line, cleared_cnt);
+		}
+		printMap();
+	}
+}
+
+void resetLine(int line_y) {		// 해당 라인 제거 (전부 0으로 변경)
+	for (int j = 1; j < WIDTH - 1; j++) {
+		map[line_y][j] = 0;
+	}
+}
+
+void dropLine(int line_y, int cleared_cnt) {		// 클리어된 라인 수만큼 밑으로 내림
+	for (int j = 1; j < WIDTH - 1; j++) {
+		map[line_y + cleared_cnt][j] = map[line_y][j];
+	}
+}
+
+bool isCleared(int line_y) {		// 해당 라인이 클리어됐다면 true
+	for (int j = 1; j < WIDTH - 1; j++) {
+		if (map[line_y][j] == 0) {
+			return false;
+		}
+	}
+	return true;
+}
+
 int getDeltaY(BLOCK* pBlock) {	// 떨어지는 블럭과 바닥 간의 거리를 리턴하는 함수.
 	int deltaY = HEIGHT;		// 떨어지는 블럭과 바닥간의 거리를 저장. 최종적으로 최솟값을 얻는 것이 목표이므로 최댓값으로 초기화
 
@@ -228,6 +274,24 @@ int getDeltaXfromSide(BLOCK* pBlock) {
 		}
 	}
 	return deltaX;
+}
+
+int getBlockLowestY(BLOCK* pBlock) {		// 블럭에서 가장 낮은 높이값을 리턴
+	int lowestY = pBlock->blockPoint[0].y;
+
+	for (int i = 0; i < BLOCK_SIZE - 1; i++) {
+		lowestY = GET_MAX(lowestY, pBlock->blockPoint[i + 1].y);
+	}
+	return lowestY;
+}
+
+int getBlockHighestY(BLOCK* pBlock) {		// 블럭에서 가장 높은 높이값을 리턴
+	int highestY = pBlock->blockPoint[0].y;
+
+	for (int i = 0; i < BLOCK_SIZE - 1; i++) {
+		highestY = GET_MIN(highestY, pBlock->blockPoint[i + 1].y);
+	}
+	return highestY;
 }
 
 void gotoxy(int x, int y) {		// 커서를 해당 좌표로 이동
