@@ -51,5 +51,6 @@ void removeBlockPrev(BLOCK* pBlock);
 void gotoxy(int x, int y);
 int getDeltaY(BLOCK* pBlock);
 int getDeltaXfromSide(BLOCK* pBlock);
+int getKey();
 
 #endif		// #ifndef¹® Á¾·á

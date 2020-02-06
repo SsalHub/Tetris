@@ -189,3 +189,63 @@ int getDeltaXfromSide(BLOCK* pBlock) {
 	}
 	return deltaX;
 }
+
+int getKey() {
+	static int key_nFrame[5];
+	int key = -1;
+
+	int keyState = GetAsyncKeyState(VK_UP);		
+	if (keyState & 0x8000) {		
+		if (key_nFrame[KS_UP] != 1) {		
+			key = VK_UP;
+		}
+		key_nFrame[KS_UP] = 1;		
+	}
+	else {		
+		key_nFrame[KS_UP] = 0;		
+	}
+
+	keyState = GetAsyncKeyState(VK_DOWN);		
+	if (keyState & 0x8000) {		
+		if (key_nFrame[KS_DOWN] % 5 == 0) {		
+			key = VK_DOWN;
+		}
+		key_nFrame[KS_DOWN]++;	
+	}
+	else {	
+		key_nFrame[KS_DOWN] = 0;		
+	}
+
+	keyState = GetAsyncKeyState(VK_LEFT);
+	if (keyState & 0x8000) {	
+		if (key_nFrame[KS_LEFT] % 10 == 0) {
+			key = VK_LEFT;
+		}
+		key_nFrame[KS_LEFT]++;
+	}
+	else {	
+		key_nFrame[KS_LEFT] = 0;
+		keyState = GetAsyncKeyState(VK_RIGHT);
+		if (keyState & 0x8000) {	
+			if (key_nFrame[KS_RIGHT] % 10 == 0) {
+				key = VK_RIGHT;
+			}
+			key_nFrame[KS_RIGHT]++;
+		}
+		else {	
+			key_nFrame[KS_RIGHT] = 0;
+		}
+	}
+
+	keyState = GetAsyncKeyState(VK_SPACE);
+	if (keyState & 0x8000) {
+		if (key_nFrame[KS_SPACE] != 1) {
+			key = VK_SPACE;
+		}
+		key_nFrame[KS_SPACE] = 1;
+	}
+	else
+		key_nFrame[KS_SPACE] = 0;
+
+	return key;
+}
