@@ -55,7 +55,7 @@ int main() {
 				break;
 			case VK_RIGHT:
 				for (int i = 0; i < BLOCK_SIZE; i++) {
-					if (map[block.blockPoint[i].y][block.blockPoint[i].x - 1] == 1) {
+					if (map[block.blockPoint[i].y][block.blockPoint[i].x + 1] == 1) {
 						break;
 					}
 					if (i == BLOCK_SIZE - 1)
