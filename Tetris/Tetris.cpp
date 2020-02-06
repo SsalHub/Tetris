@@ -36,8 +36,8 @@ void setBlock(BLOCK* pBlock) {		// 블럭 의 속성값 초기화.
 	POINT* point = pBlock->blockPoint;
 	setPoint(point, 2 * 3, -1);	// 블럭의 중심점을 (2 * 3, -1)으로 초기화.
 
-	pBlock->blockType = BLOCK_I;
-	//pBlock->blockType = (TYPE)(rand() % 7);
+	//pBlock->blockType = BLOCK_I;
+	pBlock->blockType = (TYPE)(rand() % 7);
 	// 하나의 블럭을 구성하는 4개의 작은 블럭들을 중심점 기준으로 좌표 초기화. 
 	switch (pBlock->blockType) {
 	case BLOCK_O:
