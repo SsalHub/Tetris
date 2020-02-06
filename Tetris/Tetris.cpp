@@ -80,35 +80,25 @@ void setBlock(BLOCK* pBlock) {		// 블럭 의 속성값 초기화.
 	pBlock->deltaY = getDeltaY(pBlock);
 }
 
-bool pressed(int key, bool* anyButton) {
+bool pressed(int key) {
+	return GetAsyncKeyState(key) & 0x8000;
+}
+
+void getKey(bool* up, bool* down, bool* left, bool* right, bool* space) {
 	static int key_nFrame[5]; // key_nFrame은 직전 키 눌림 여부나 눌린 횟수.(frame)
 	const int downFrame = 5, moveFrame = 10; // down / left, right를 실행할 프레임 주기.
-	const int keyPressCheck = 0x8000;
 
-	if (key) {
-		if ((GetAsyncKeyState(key) & keyPressCheck)) {
-			*anyButton = true;
-			// down, left, right에서 ++이 후위 연산자면 첫 입력 실행, 전위 연산자면 첫 입력 실행X.
-			switch (key) {
-			case VK_UP: // 이전 key_nFrame 값이 0이어야 true를 리턴.
-				return !key_nFrame[KS_UP]++;
-			case VK_DOWN: // key_nframe 값이 1씩 증가하고, downFrame으로 나눈 나머지가 0이면 true 리턴.
-				return !(++key_nFrame[KS_DOWN] % downFrame);
-			case VK_LEFT:
-				return !(++key_nFrame[KS_LEFT] % moveFrame);
-			case VK_RIGHT:
-				return !(++key_nFrame[KS_RIGHT] % moveFrame);
-			case VK_SPACE:
-				return !key_nFrame[KS_SPACE]++;
-			}
-		}
-		else return false;
-	}
-	else {
+	// down, left, right에서 ++이 후위 연산자면 첫 입력 실행, 전위 연산자면 첫 입력 실행X.
+	*up = pressed(VK_UP) && !key_nFrame[KS_UP]++;
+	*down = pressed(VK_DOWN) && !(++key_nFrame[KS_DOWN] % downFrame);
+	*left = pressed(VK_LEFT) && !pressed(VK_RIGHT) && !(key_nFrame[KS_LEFT]++ % moveFrame);
+	*right = !pressed(VK_LEFT) && pressed(VK_RIGHT) && !(key_nFrame[KS_RIGHT]++ % moveFrame);
+	*space = pressed(VK_SPACE) && !key_nFrame[KS_SPACE]++;
+
+	// 아무 키도 눌리지 않았을 경우 key_nFrame 초기화.
+	if (!(pressed(VK_UP) || pressed(VK_DOWN) || pressed(VK_SPACE) || pressed(VK_LEFT) || pressed(VK_RIGHT)))
 		for (int i = 0; i < KEY_COUNT; i++)
 			key_nFrame[i] = 0;
-		return 0;
-	}
 }
 
 bool isBlocked(const BLOCK* pBlock, int x) {
