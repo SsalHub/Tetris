@@ -14,6 +14,7 @@
 #define WIDTH 12					// 맵의 너비
 #define HEIGHT 27					// 맵의 높이
 #define BLOCK_SIZE 4				// 블록 하나에 포함되는 작은 블록의 갯수(모두 4개)
+#define BLOCK_LIST_LEN 4
 #define FRAME_PER_SEC 240			// 테트리스의 fps. 초당 240회의 연산을 하도록 고정 (고정 안할 시 초당 n천회 이상)
 #define ARROW_KEY_DEFAULT 224		// 방향키를 입력받을 때, 방향키의 ASCII값에 앞서 입력되는 ASCII값
 #define KEY_LEFT 75
@@ -41,7 +42,12 @@ void setMap(void);
 void printMap(void);
 void setPoint(POINT* pPoint, int x, int y);
 bool isInsideMap(const POINT* pPoint);
-void setBlock(BLOCK* pBlock);
+void setBlockList(TYPE* pList);
+void addBlockList(TYPE* pList);
+TYPE popBlockList(TYPE* pList);
+void printBlockList(TYPE* pList);
+void clearBlockList();
+void setBlock(BLOCK* pBlock, TYPE blockType);
 bool pressed(int key);
 void getKey(bool*, bool*, bool*, bool*, bool*);
 bool isBlocked(const BLOCK* pBlock, int x);
@@ -53,7 +59,7 @@ void removeBlock(BLOCK* pBlock);
 void removeBlockPrev(BLOCK* pBlock);
 void rotateBlockPoint(BLOCK* pBlock);
 void rotateBlock(BLOCK* pBlock);
-void lineClear(BLOCK* pBlock);
+void clearLine(BLOCK* pBlock);
 void resetLine(int line_y);
 void dropLine(int line_y, int clear_line_cnt);
 bool isCleared(int line_y);
