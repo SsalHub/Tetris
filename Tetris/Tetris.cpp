@@ -146,15 +146,16 @@ void clearBlockList() {		// 출력된 블럭 리스트 지우기
 	}
 }
 
-void setBlock(BLOCK* pBlock, TYPE blockType) {		// 블럭 의 속성값 초기화.
+void setBlock(BLOCK* pBlock, TYPE* pList) {		// 블럭 의 속성값 초기화.
 	static int a = 0;
 	gotoxy(40, 5);
 	printf("블럭 생성 횟수 : %d", ++a);
+
 	POINT* point = pBlock->blockPoint;
 	setPoint(point, 2 * 3, -1);	// 블럭의 중심점을 (2 * 3, -1)으로 초기화.
 
-	//pBlock->blockType = BLOCK_I;
-	pBlock->blockType = blockType;
+	pBlock->blockType = popBlockList(pList);
+
 	// 하나의 블럭을 구성하는 4개의 작은 블럭들을 중심점 기준으로 좌표 초기화. 
 	switch (pBlock->blockType) {
 	case BLOCK_O:

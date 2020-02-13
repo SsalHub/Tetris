@@ -23,17 +23,14 @@ int main() {
 	
 	while (1) {	// 게임 오버까지
 
-		/* 블럭 리스트에서 블럭을 받아옴 */
-		newBlock = popBlockList(blockList);
-
+		/* 블럭 생성 */
+		setBlock(&block, blockList);
+		
 		/* 블럭 리스트에 새 블럭 추가 및 출력*/
 		addBlockList(blockList);
 		clearBlockList();
 		printBlockList(blockList);
 
-		/* 블럭 생성 */
-		setBlock(&block, newBlock);
-		
 		/* 블럭 드랍 */
 		while (0 < block.deltaY) {		// 블록이 맵 바닥까지 떨어질 때까지 반복
 			gotoxy(17, 27);
