@@ -79,7 +79,32 @@ int main() {
 		}
 
 		gotoxy(40, 2);
-		printf("deltaX = %d", getDeltaXfromSide(&block));
+		printf("deltaX = %2d", getDeltaXfromSide(&block));
+		//BLOCK_I, BLOCK_O, BLOCK_Z, BLOCK_S, BLOCK_J, BLOCK_L, BLOCK_T
+		gotoxy(40, 3);
+		switch (block.blockType) {
+		case BLOCK_O:
+			printf("block type = BLOCK_O");
+			break;
+		case BLOCK_I:
+			printf("block type = BLOCK_I");
+			break;
+		case BLOCK_Z:
+			printf("block type = BLOCK_Z");
+			break;
+		case BLOCK_S:
+			printf("block type = BLOCK_S");
+			break;
+		case BLOCK_J:
+			printf("block type = BLOCK_J");
+			break;
+		case BLOCK_L:
+			printf("block type = BLOCK_L");
+			break;
+		case BLOCK_T:
+			printf("block type = BLOCK_T");
+			break;
+		}
 
 		/* 블럭 드랍이 끝나면 map[][]을 1로 수정*/
 		for (int i = 0; i < BLOCK_SIZE; i++)
