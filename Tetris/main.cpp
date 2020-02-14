@@ -13,14 +13,23 @@ int main() {
 	setMap();
 	printMap();
 
+	TYPE blockList[BLOCK_LIST_LEN];		// 블럭 리스트
+	TYPE newBlock;		// 리스트에서 첫번째 값을 뽑아와서 임시로 저장하는 변수
+	setBlockList(blockList);
+
 	BLOCK block;
 	gotoxy(2, 27);
 	printf("block.nFrame = ");
-
+	
 	while (1) {	// 게임 오버까지
 
 		/* 블럭 생성 */
-		setBlock(&block);
+		setBlock(&block, blockList);
+		
+		/* 블럭 리스트에 새 블럭 추가 및 출력*/
+		addBlockList(blockList);
+		clearBlockList();
+		printBlockList(blockList);
 
 		/* 블럭 드랍 */
 		while (0 < block.deltaY) {		// 블록이 맵 바닥까지 떨어질 때까지 반복
@@ -49,10 +58,10 @@ int main() {
 			}
 			if (space) {
 				moveBlock(&block, 0, block.deltaY);
+				break;
 			}
 
 			/* 키보드 입력받는 부분 끝*/
-
 
 			if (block.nFrame <= 0) {
 				moveBlock(&block, 0, 1);
@@ -71,7 +80,7 @@ int main() {
 			map[block.blockPoint[i].y][block.blockPoint[i].x] = 1;
 
 		/* 없어지는 줄 있는지 검사 */
-		lineClear(&block);
+		clearLine(&block);
 		
 	}
 	return 0;
