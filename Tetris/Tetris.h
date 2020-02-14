@@ -46,7 +46,6 @@ typedef struct {
 void setMap(void);
 void printMap(void);
 void setPoint(POINT* pPoint, int x, int y);
-bool isInsideMap(const POINT* pPoint);
 void setBlockList(TYPE* pList);
 void addBlockList(TYPE* pList);
 TYPE popBlockList(TYPE* pList);

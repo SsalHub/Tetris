@@ -32,10 +32,13 @@ int main() {
 		clearBlockList();
 		printBlockList(blockList);
 
+		if (block.deltaY == 0) {
+			break;
+		}
 		/* 블럭 드랍 */
 		while (0 < block.deltaY) {		// 블록이 맵 바닥까지 떨어질 때까지 반복
-			SET_BLOCK_COLOR(DEFAULT);
 			gotoxy(17, 27);
+			SET_BLOCK_COLOR(DEFAULT);
 			printf("%03d", block.nFrame);
 
 			/* 키보드 입력받는 부분 */
@@ -66,10 +69,10 @@ int main() {
 			/* 키보드 입력받는 부분 끝*/
 
 			if (block.nFrame <= 0) {
-				SET_BLOCK_COLOR(DEFAULT);
 				moveBlock(&block, 0, 1);
 				gotoxy(17, 27);
 				block.nFrame = FRAME_PER_SEC;
+				SET_BLOCK_COLOR(DEFAULT);
 				printf("%03d", block.nFrame);
 			}
 
@@ -88,7 +91,7 @@ int main() {
 		
 	}
 
-	gotoxy(40, 12);
+	gotoxy(2 * 25, 12);
 	SET_BLOCK_COLOR(DEFAULT);
 	printf("GAME OVER!");
 	while (1) {
@@ -96,5 +99,6 @@ int main() {
 			break;
 		}
 	}
+	gotoxy(0, 28);
 	return 0;
 }

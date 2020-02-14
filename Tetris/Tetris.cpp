@@ -37,10 +37,6 @@ void setPoint(POINT* pPoint, int x, int y) {		// 블럭의 x, y좌표 값을 입력받은 �
 	pPoint->y = y;
 }
 
-bool isInsideMap(const POINT* pPoint) {
-	return (0 < pPoint->x && pPoint->x < WIDTH - 1) && (0 < pPoint->y && pPoint->y < HEIGHT - 1);
-}
-
 void setBlockList(TYPE* pList) {		// 블럭 리스트를 최초 초기화 및 블럭 리스트의 테두리 출력.
 	const int startX = 12;
 	const int startY = 0;
@@ -143,7 +139,6 @@ void printBlockList(TYPE* pList) {		// 블럭 리스트 출력
 			gotoxy(2 * ((startX + 2) + point[j].x), nowY + point[j].y);
 			printf("■");
 		}
-		SET_BLOCK_COLOR(DEFAULT);
 
 		nowY += blockHeight + 1;
 	}
@@ -296,15 +291,17 @@ void putBlock(BLOCK* pBlock) { // 저장된 좌표로 이동하여 블럭을 출력함.
 
 void putBlockPrev(BLOCK* pBlock) {		// 드랍 중인 블록의 미리보기 출력.
 	for (int i = 0; i < BLOCK_SIZE; i++) {
-		gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y + pBlock->deltaY);
-		printf("□");
+		if (0 < pBlock->blockPoint[i].y + pBlock->deltaY) {
+			gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y + pBlock->deltaY);
+			printf("□");
+		}
 	}
 }
 
 void removeBlock(BLOCK* pBlock) {		// 출력된 블럭의 좌표에 공백을 덮어씌워 지운다.
 	removeBlockPrev(pBlock);		// 미리보기 블럭 제거
 	for (int i = 0; i < BLOCK_SIZE; i++) {
-		if (isInsideMap(&pBlock->blockPoint[i]) && pBlock->blockPoint[i].y != 0) {   // map의 테두리 안에 있을 때만
+		if (0 < pBlock->blockPoint[i].y) {   // map 안에 있을 때만
 			gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y);
 			printf("  ");	// 기존의 ■를 지우기 위해 공백 출력
 		}
@@ -313,8 +310,10 @@ void removeBlock(BLOCK* pBlock) {		// 출력된 블럭의 좌표에 공백을 덮어씌워 지운�
 
 void removeBlockPrev(BLOCK* pBlock) {		// 미리보기 위에 공백을 출력하여 덮어씌움.
 	for (int i = 0; i < BLOCK_SIZE; i++) {
-		gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y + pBlock->deltaY);
-		printf("  ");
+		if (0 < pBlock->blockPoint[i].y + pBlock->deltaY) {
+			gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y + pBlock->deltaY);
+			printf("  ");
+		}
 	}
 }
 
