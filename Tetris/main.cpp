@@ -5,10 +5,12 @@
 */
 
 bool map[HEIGHT][WIDTH] = { 0 };
+BlockColor map_color[HEIGHT][WIDTH] = { NONE };
 
 int main() {
 	srand((unsigned int)time(NULL));
 	system("mode con cols=80 lines=30");		// 프롬프트 창 크기 조절
+	setCursorView(false);
 
 	setMap();
 	printMap();
@@ -22,7 +24,6 @@ int main() {
 	printf("block.nFrame = ");
 	
 	while (1) {	// 게임 오버까지
-
 		/* 블럭 생성 */
 		setBlock(&block, blockList);
 		
@@ -31,9 +32,13 @@ int main() {
 		clearBlockList();
 		printBlockList(blockList);
 
+		if (block.deltaY == 0) {
+			break;
+		}
 		/* 블럭 드랍 */
 		while (0 < block.deltaY) {		// 블록이 맵 바닥까지 떨어질 때까지 반복
 			gotoxy(17, 27);
+			SET_BLOCK_COLOR(DEFAULT);
 			printf("%03d", block.nFrame);
 
 			/* 키보드 입력받는 부분 */
@@ -67,6 +72,7 @@ int main() {
 				moveBlock(&block, 0, 1);
 				gotoxy(17, 27);
 				block.nFrame = FRAME_PER_SEC;
+				SET_BLOCK_COLOR(DEFAULT);
 				printf("%03d", block.nFrame);
 			}
 
@@ -76,12 +82,23 @@ int main() {
 		}
 
 		/* 블럭 드랍이 끝나면 map[][]을 1로 수정*/
-		for (int i = 0; i < BLOCK_SIZE; i++)
+		for (int i = 0; i < BLOCK_SIZE; i++) {
 			map[block.blockPoint[i].y][block.blockPoint[i].x] = 1;
-
+			map_color[block.blockPoint[i].y][block.blockPoint[i].x] = (BlockColor)block.blockType;
+		}
 		/* 없어지는 줄 있는지 검사 */
 		clearLine(&block);
 		
 	}
+
+	gotoxy(2 * 25, 12);
+	SET_BLOCK_COLOR(DEFAULT);
+	printf("GAME OVER!");
+	while (1) {
+		if(_kbhit()){
+			break;
+		}
+	}
+	gotoxy(0, 28);
 	return 0;
 }
