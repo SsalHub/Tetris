@@ -1,13 +1,18 @@
 #include "Tetris.h"
 extern bool map[HEIGHT][WIDTH];
+extern BlockColor map_color[HEIGHT][WIDTH];
 
 void setMap() {		// 맵 초기화(테두리 생성).
 	for (int i = 0; i < WIDTH; i++) {
 		map[HEIGHT - 1][i] = 1;
+		map_color[0][i] = DEFAULT;
+		map_color[HEIGHT - 1][i] = DEFAULT;
 	}
 	for (int i = 0; i < HEIGHT - 1; i++) {
 		map[i][0] = 1;
 		map[i][WIDTH - 1] = 1;
+		map_color[i][0] = DEFAULT;
+		map_color[i][WIDTH - 1] = DEFAULT;
 	}
 }
 
@@ -15,8 +20,13 @@ void printMap() {		// 초기화된 맵 출력
 	gotoxy(0, 0);
 	for (int i = 0; i < HEIGHT; i++) {
 		for (int j = 0; j < WIDTH; j++) {
-			if (!i || map[i][j]) printf("■");
-			else printf("  ");
+			if (!i || map[i][j]) {
+				SET_BLOCK_COLOR(map_color[i][j]);
+				printf("■");
+			}
+			else {
+				printf("  ");
+			}
 		}
 		printf("\n");
 	}
@@ -37,10 +47,11 @@ void setBlockList(TYPE* pList) {		// 블럭 리스트를 최초 초기화 및 블럭 리스트의 
 
 	/* 블럭 리스트 초기화 */
 	for (int i = 0; i < BLOCK_LIST_LEN; i++) {	
-		pList[i] = (TYPE)(rand() % 7);
+		pList[i] = (TYPE)(rand() % 7 + 9);
 	}
 
 	/* 블럭 리스트의 테두리 출력*/
+	SET_BLOCK_COLOR(DEFAULT);
 	for (int i = 0; i < 20; i++) {
 		gotoxy(2 * (startX), i);
 		printf("* ");
@@ -56,7 +67,7 @@ void setBlockList(TYPE* pList) {		// 블럭 리스트를 최초 초기화 및 블럭 리스트의 
 }
 
 void addBlockList(TYPE* pList) {		// 블럭 리스트에 새로 추가.
-	pList[BLOCK_LIST_LEN - 1] = (TYPE)(rand() % 7);
+	pList[BLOCK_LIST_LEN - 1] = (TYPE)(rand() % 7 + 9);
 }
 
 TYPE popBlockList(TYPE* pList) {		// 블럭 리스트에서 0번째 인덱스의 값을 리턴하고 삭제.
@@ -127,10 +138,12 @@ void printBlockList(TYPE* pList) {		// 블럭 리스트 출력
 			break;
 		}
 
+		SET_BLOCK_COLOR(pList[i]);
 		for (int j = 0; j < BLOCK_SIZE; j++) {
 			gotoxy(2 * ((startX + 2) + point[j].x), nowY + point[j].y);
 			printf("■");
 		}
+		SET_BLOCK_COLOR(DEFAULT);
 
 		nowY += blockHeight + 1;
 	}
@@ -271,9 +284,10 @@ void rotateBlock(BLOCK* pBlock) {
 }
 
 void putBlock(BLOCK* pBlock) { // 저장된 좌표로 이동하여 블럭을 출력함.
+	SET_BLOCK_COLOR(pBlock->blockType);
 	putBlockPrev(pBlock);
 	for (int i = 0; i < BLOCK_SIZE; i++) {
-		if (0 <= pBlock->blockPoint[i].y) {
+		if (0 < pBlock->blockPoint[i].y) {
 			gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y);
 			printf("■");
 		}
@@ -332,12 +346,14 @@ void clearLine(BLOCK* pBlock) {
 void resetLine(int line_y) {		// 해당 라인 제거 (전부 0으로 변경)
 	for (int j = 1; j < WIDTH - 1; j++) {
 		map[line_y][j] = 0;
+		map_color[line_y][j] = NONE;
 	}
 }
 
 void dropLine(int line_y, int cleared_cnt) {		// 클리어된 라인 수만큼 밑으로 내림
 	for (int j = 1; j < WIDTH - 1; j++) {
 		map[line_y + cleared_cnt][j] = map[line_y][j];
+		map_color[line_y + cleared_cnt][j] = map_color[line_y][j];
 	}
 }
 
@@ -409,4 +425,11 @@ int getBlockHighestY(BLOCK* pBlock) {		// 블럭에서 가장 높은 높이값을 리턴
 void gotoxy(int x, int y) {		// 커서를 해당 좌표로 이동
 	COORD Cur = { x, y };
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), Cur);
+}
+
+void setCursorView(int bVisible) {
+	CONSOLE_CURSOR_INFO consoleCursor;
+	consoleCursor.bVisible = bVisible;
+	consoleCursor.dwSize = 1;
+	SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &consoleCursor);
 }

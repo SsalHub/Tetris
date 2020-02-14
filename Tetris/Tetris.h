@@ -26,10 +26,15 @@
 
 #define GET_MAX(n1, n2) ((n1) > (n2) ? (n1) : (n2))		// 더 큰 수를 계산하는 매크로 함수
 #define GET_MIN(n1, n2) ((n1) < (n2) ? (n1) : (n2))		// 더 작은 수를 계산하는 매크로 함수
+#define SET_BLOCK_COLOR(n) SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (n))
 
-typedef enum { BLOCK_I, BLOCK_O, BLOCK_Z, BLOCK_S, BLOCK_J, BLOCK_L, BLOCK_T } TYPE; // 블럭의 종류(7가지)를 열거형으로 정의.
+typedef enum { BLOCK_J = 9, BLOCK_S, BLOCK_I, BLOCK_Z, BLOCK_T, BLOCK_O, BLOCK_L
+} TYPE; // 블럭의 종류(7가지)를 열거형으로 정의.
+
+typedef enum { NONE = 0, DEFAULT = 7, COLOR_J = 9, COLOR_S, COLOR_I, COLOR_Z, COLOR_T, COLOR_O, COLOR_L } BlockColor;
 
 typedef enum { KS_UP, KS_DOWN, KS_LEFT, KS_RIGHT, KS_SPACE } KeyState;		// 각 키가 입력될 때에 동작을 제어하기 위한 고유값들을 열거형으로 정의. KS = KeyState
+
 
 typedef struct {
 	TYPE blockType;
@@ -68,5 +73,6 @@ int getDeltaXfromSide(BLOCK* pBlock);
 int getBlockLowestY(BLOCK* pBlock);
 int getBlockHighestY(BLOCK* pBlock);
 void gotoxy(int x, int y);
+void setCursorView(int bVisible);
 
 #endif		// #ifndef문 종료
