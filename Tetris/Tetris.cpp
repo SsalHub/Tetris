@@ -5,9 +5,9 @@ void setMap() {		// 맵 초기화(테두리 생성).
 	for (int i = 0; i < WIDTH; i++) {
 		map[HEIGHT - 1][i] = 1;
 	}
-	for (int i = 0; i < HEIGHT - 2; i++) {
-		map[i + 1][0] = 1;
-		map[i + 1][WIDTH - 1] = 1;
+	for (int i = 0; i < HEIGHT - 1; i++) {
+		map[i][0] = 1;
+		map[i][WIDTH - 1] = 1;
 	}
 }
 
@@ -221,8 +221,12 @@ void getKey(bool* up, bool* down, bool* left, bool* right, bool* space) {
 }
 
 bool isBlocked(const BLOCK* pBlock, int x) {
+	int y;
+
 	for (int i = 0; i < BLOCK_SIZE; i++) {
-		if (map[pBlock->blockPoint[i].y][pBlock->blockPoint[i].x + x] == 1) {
+		y = pBlock->blockPoint[i].y < 0 ? 0 : pBlock->blockPoint[i].y;
+
+		if (map[y][pBlock->blockPoint[i].x + x] == 1) {
 			return true;
 		}
 	}
