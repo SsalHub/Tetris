@@ -15,8 +15,7 @@ void printMap() {		// 초기화된 맵 출력
 	gotoxy(0, 0);
 	for (int i = 0; i < HEIGHT; i++) {
 		for (int j = 0; j < WIDTH; j++) {
-			//if (!i || map[i][j]) printf("■");
-			if (map[i][j]) printf("■");
+			if (!i || map[i][j]) printf("■");
 			else printf("  ");
 		}
 		printf("\n");
@@ -29,7 +28,7 @@ void setPoint(POINT* pPoint, int x, int y) {		// 블럭의 x, y좌표 값을 입력받은 �
 }
 
 bool isInsideMap(const POINT* pPoint) {
-	return (0 < pPoint->x && pPoint->x < WIDTH - 1) && (0 <= pPoint->y && pPoint->y < HEIGHT - 1);
+	return (0 < pPoint->x && pPoint->x < WIDTH - 1) && (0 < pPoint->y && pPoint->y < HEIGHT - 1);
 }
 
 void setBlockList(TYPE* pList) {		// 블럭 리스트를 최초 초기화 및 블럭 리스트의 테두리 출력.
@@ -50,7 +49,7 @@ void setBlockList(TYPE* pList) {		// 블럭 리스트를 최초 초기화 및 블럭 리스트의 
 	}
 	for (int i = 0; i <= 6; i++) {
 		gotoxy(2 * (startX + i), 0);
-		printf("ㅁ");
+		printf("**");
 		gotoxy(2 * (startX + i), 19);
 		printf("**");
 	}
@@ -148,10 +147,6 @@ void clearBlockList() {		// 출력된 블럭 리스트 지우기
 }
 
 void setBlock(BLOCK* pBlock, TYPE* pList) {		// 블럭 의 속성값 초기화.
-	static int a = 0;
-	gotoxy(40, 5);
-	printf("블럭 생성 횟수 : %d", ++a);
-
 	POINT* point = pBlock->blockPoint;
 	setPoint(point, 2 * 3, -1);	// 블럭의 중심점을 (2 * 3, -1)으로 초기화.
 
@@ -276,7 +271,7 @@ void rotateBlock(BLOCK* pBlock) {
 }
 
 void putBlock(BLOCK* pBlock) { // 저장된 좌표로 이동하여 블럭을 출력함.
-	//putBlockPrev(pBlock);
+	putBlockPrev(pBlock);
 	for (int i = 0; i < BLOCK_SIZE; i++) {
 		if (0 <= pBlock->blockPoint[i].y) {
 			gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y);
@@ -293,9 +288,9 @@ void putBlockPrev(BLOCK* pBlock) {		// 드랍 중인 블록의 미리보기 출력.
 }
 
 void removeBlock(BLOCK* pBlock) {		// 출력된 블럭의 좌표에 공백을 덮어씌워 지운다.
-	//removeBlockPrev(pBlock);		// 미리보기 블럭 제거
+	removeBlockPrev(pBlock);		// 미리보기 블럭 제거
 	for (int i = 0; i < BLOCK_SIZE; i++) {
-		if (isInsideMap(&pBlock->blockPoint[i])) {   // map의 테두리 안에 있을 때만
+		if (isInsideMap(&pBlock->blockPoint[i]) && pBlock->blockPoint[i].y != 0) {   // map의 테두리 안에 있을 때만
 			gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y);
 			printf("  ");	// 기존의 ■를 지우기 위해 공백 출력
 		}
