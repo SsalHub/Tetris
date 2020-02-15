@@ -32,9 +32,11 @@ int main() {
 		clearBlockList();
 		printBlockList(blockList);
 
-		if (block.deltaY == 0) {
+		/* 게임 오버 조사 */
+		if (block.deltaY == 0) {		// 블럭이 생성되자마자 떨어질 공간이 없는 상태라면
 			break;
 		}
+
 		/* 블럭 드랍 */
 		while (0 < block.deltaY) {		// 블록이 맵 바닥까지 떨어질 때까지 반복
 			gotoxy(17, 27);
@@ -94,8 +96,10 @@ int main() {
 	gotoxy(2 * 25, 12);
 	SET_BLOCK_COLOR(DEFAULT);
 	printf("GAME OVER!");
+	gotoxy(2 * 25, 13);
+	printf(("press ESC to exit"));
 	while (1) {
-		if(_kbhit()){
+		if(GetAsyncKeyState(VK_ESCAPE) & 0x8000){
 			break;
 		}
 	}
