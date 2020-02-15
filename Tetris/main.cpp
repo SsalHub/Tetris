@@ -74,13 +74,18 @@ int main() {
 
 			/* 키보드 입력받는 부분 끝*/
 
-			if (block.deltaY && !nFrame) {
-				moveBlock(&block, 0, 1);
-				gotoxy(17, 27);
-				nFrame = FRAME_PER_SEC;
+
+			// nFrame과 deltaY가 모두 0이면 break.
+			if (nFrame) nFrame--;
+			else {
+				if (block.deltaY) {
+					moveBlock(&block, 0, 1);
+					gotoxy(17, 27);
+					nFrame = FRAME_PER_SEC;
+				}
+				else
+					break;
 			}
-			else
-				nFrame--;
 
 			gotoxy(0, 0);
 			Sleep(1000 / FRAME_PER_SEC);
