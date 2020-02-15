@@ -17,7 +17,10 @@ void setMap() {		// 맵 초기화(테두리 생성).
 }
 
 void printMap() {		// 초기화된 맵 출력
-	gotoxy(0, 0);
+	int x = 0;
+	int y = 0;
+
+	gotoxy(x, y);
 	for (int i = 0; i < HEIGHT; i++) {
 		for (int j = 0; j < WIDTH; j++) {
 			if (!i || map[i][j]) {
@@ -28,7 +31,7 @@ void printMap() {		// 초기화된 맵 출력
 				printf("  ");
 			}
 		}
-		printf("\n");
+		gotoxy(x, ++y);
 	}
 }
 
@@ -422,7 +425,7 @@ int getBlockHighestY(BLOCK* pBlock) {		// 블럭에서 가장 높은 높이값을 리턴
 }
 
 void gotoxy(int x, int y) {		// 커서를 해당 좌표로 이동
-	COORD Cur = { x, y };
+	COORD Cur = { MAP_SPAWN_POINT + x, y };
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), Cur);
 }
 

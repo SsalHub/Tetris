@@ -23,6 +23,7 @@
 #define KEY_DOWN 80
 #define KEY_SPACE 32
 #define KEY_COUNT 5
+#define MAP_SPAWN_POINT 20
 
 #define GET_MAX(n1, n2) ((n1) > (n2) ? (n1) : (n2))		// 더 큰 수를 계산하는 매크로 함수
 #define GET_MIN(n1, n2) ((n1) < (n2) ? (n1) : (n2))		// 더 작은 수를 계산하는 매크로 함수
