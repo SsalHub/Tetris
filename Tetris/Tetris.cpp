@@ -20,12 +20,16 @@ void printMap() {		// 초기화된 맵 출력
 	gotoxy(0, 0);
 	for (int i = 0; i < HEIGHT; i++) {
 		for (int j = 0; j < WIDTH; j++) {
-			if (!i || map[i][j]) {
-				SET_BLOCK_COLOR(map_color[i][j]);
-				printf("■");
-			}
-			else {
+			SET_BLOCK_COLOR(map_color[i][j]);
+			switch (map_color[i][j]) {
+			case NONE :			// 빈 공간일 경우
 				printf("  ");
+				break;
+			case DEFAULT :		// 맵 테두리일 경우
+				printf("▣");
+				break;
+			default :				// 그 외
+				printf("■");
 			}
 		}
 		printf("\n");
