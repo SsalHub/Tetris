@@ -263,17 +263,23 @@ void rotateBlockPoint(BLOCK* pBlock) { // 블럭을 회전시키는 함수.
 		int delta_y = point[i].y - point[0].y;
 		setPoint(&point[i], point[0].x - delta_y, point[0].y + delta_x);
 	}
+}
 
-	int deltaX = getDeltaXfromSide(pBlock);
+void rotateBlock(BLOCK* pBlock) {
+	int deltaX;
+
+	removeBlock(pBlock);
+	rotateBlockPoint(pBlock);
+
+	/* 회전된 블럭이 맵 테두리와 충돌하지 않도록 조정*/
+	deltaX = getDeltaXfromSide(pBlock);
 	if (deltaX) {
 		/* 튀어나온 거리만큼 x좌표 변경 */
 		moveBlockPoint(pBlock, -deltaX, 0);
 	}
-}
 
-void rotateBlock(BLOCK* pBlock) {
-	removeBlock(pBlock);
-	rotateBlockPoint(pBlock);
+	/* 회전된 블럭이 다른 블럭과 충돌하지 않도록 조정 */
+
 	pBlock->deltaY = getDeltaY(pBlock);
 	putBlock(pBlock);
 }
@@ -386,10 +392,10 @@ int getDeltaXfromSide(BLOCK* pBlock) {
 		int X = pBlock->blockPoint[i].x;
 		int tmp;
 
-		if (X < 1) { // blockPoint[j]의 x좌표가 1보다 작을 때, x = 1을 기준으로 한 상대적 위치
+		if (X < 1) { // blockPoint[i]의 x좌표가 1보다 작을 때, x = 1을 기준으로 한 상대적 위치
 			tmp = X - 1;
 		}
-		else if (X > WIDTH - 2) { // blockPoint[j]의 x좌표가 WIDTH - 2보다 클 때, x = WIDTH - 2를 기준으로 한 상대적 위치
+		else if (X > WIDTH - 2) { // blockPoint[i]의 x좌표가 WIDTH - 2보다 클 때, x = WIDTH - 2를 기준으로 한 상대적 위치
 			tmp = X - (WIDTH - 2);
 		}
 		else { // blockPoint가 알맞은 위치에 있을 때.
