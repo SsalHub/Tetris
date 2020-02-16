@@ -51,6 +51,7 @@ void addBlockList(TYPE* pList);
 TYPE popBlockList(TYPE* pList);
 void printBlockList(TYPE* pList);
 void clearBlockList();
+bool isElementRepeated(TYPE* pList, int hIdx, int wIdx);
 void setBlock(BLOCK* pBlock, TYPE* pList);
 bool pressed(int key);
 void getKey(bool*, bool*, bool*, bool*, bool*);
