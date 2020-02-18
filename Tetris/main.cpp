@@ -15,7 +15,7 @@ int main() {
 	setMap();
 	printMap();
 
-	TYPE blockList[BLOCK_LIST_LEN];		// 블럭 리스트
+	TYPE blockList[14];		// 블럭 리스트
 	TYPE newBlock;		// 리스트에서 첫번째 값을 뽑아와서 임시로 저장하는 변수
 	setBlockList(blockList);
 
@@ -27,8 +27,7 @@ int main() {
 		/* 블럭 생성 */
 		setBlock(&block, blockList);
 		
-		/* 블럭 리스트에 새 블럭 추가 및 출력*/
-		addBlockList(blockList);
+		/* 블럭 리스트 출력*/
 		clearBlockList();
 		printBlockList(blockList);
 

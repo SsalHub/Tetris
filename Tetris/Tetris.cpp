@@ -42,8 +42,16 @@ void setBlockList(TYPE* pList) {		// 블럭 리스트를 최초 초기화 및 블럭 리스트의 
 	const int startY = 0;
 
 	/* 블럭 리스트 초기화 */
-	for (int i = 0; i < BLOCK_LIST_LEN; i++) {	
-		pList[i] = (TYPE)(rand() % 7 + 9);
+	for (int i = 0; i < 2; i++) {	
+		for (int j = 7 * i; j < 7 * (i + 1); j++) {
+			pList[j] = (TYPE)(rand() % 7 + 9);
+			for (int k = j - 1; 7 * i <= k; k--) {
+				if (pList[j] == pList[k]) {
+					j--;
+					break;
+				}
+			}
+		}
 	}
 
 	/* 블럭 리스트의 테두리 출력*/
@@ -63,13 +71,24 @@ void setBlockList(TYPE* pList) {		// 블럭 리스트를 최초 초기화 및 블럭 리스트의 
 }
 
 void addBlockList(TYPE* pList) {		// 블럭 리스트에 새로 추가.
-	pList[BLOCK_LIST_LEN - 1] = (TYPE)(rand() % 7 + 9);
+	if (pList[7] == NONE) {
+		for (int i = 7; i < 14; i++) {
+			pList[i] = (TYPE)(rand() % 7 + 9);
+			for (int j = i - 1; 7 <= j; j--) {
+				if (pList[i] == pList[j]) {
+					i--;
+					break;
+				}
+			}
+		}
+	}
 }
 
 TYPE popBlockList(TYPE* pList) {		// 블럭 리스트에서 0번째 인덱스의 값을 리턴하고 삭제.
 	TYPE tmpBlockType = pList[0];
-	for (int i = 0; i < BLOCK_LIST_LEN - 1; i++) {
+	for (int i = 0; pList[i + 1] != NONE && i < 13; i++) {
 		pList[i] = pList[i + 1];
+		pList[i + 1] = (TYPE)NONE;
 	}
 	return tmpBlockType;
 }
@@ -159,6 +178,7 @@ void setBlock(BLOCK* pBlock, TYPE* pList) {		// 블럭 의 속성값 초기화.
 	setPoint(point, 2 * 3, -1);	// 블럭의 중심점을 (2 * 3, -1)으로 초기화.
 
 	pBlock->blockType = popBlockList(pList);
+	addBlockList(pList);
 
 	// 하나의 블럭을 구성하는 4개의 작은 블럭들을 중심점 기준으로 좌표 초기화. 
 	switch (pBlock->blockType) {
