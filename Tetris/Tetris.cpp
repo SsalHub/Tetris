@@ -20,12 +20,16 @@ void printMap() {		// 초기화된 맵 출력
 	gotoxy(0, 0);
 	for (int i = 0; i < HEIGHT; i++) {
 		for (int j = 0; j < WIDTH; j++) {
-			if (!i || map[i][j]) {
-				SET_BLOCK_COLOR(map_color[i][j]);
-				printf("■");
-			}
-			else {
+			SET_BLOCK_COLOR(map_color[i][j]);
+			switch (map_color[i][j]) {
+			case NONE :			// 빈 공간일 경우
 				printf("  ");
+				break;
+			case DEFAULT :		// 맵 테두리일 경우
+				printf("▣");
+				break;
+			default :				// 그 외
+				printf("■");
 			}
 		}
 		printf("\n");
@@ -42,8 +46,16 @@ void setBlockList(TYPE* pList) {		// 블럭 리스트를 최초 초기화 및 블럭 리스트의 
 	const int startY = 0;
 
 	/* 블럭 리스트 초기화 */
-	for (int i = 0; i < BLOCK_LIST_LEN; i++) {	
-		pList[i] = (TYPE)(rand() % 7 + 9);
+	for (int i = 0; i < 2; i++) {	
+		for (int j = 7 * i; j < 7 * (i + 1); j++) {
+			pList[j] = (TYPE)(rand() % 7 + 9);
+			for (int k = j - 1; 7 * i <= k; k--) {
+				if (pList[j] == pList[k]) {
+					j--;
+					break;
+				}
+			}
+		}
 	}
 
 	/* 블럭 리스트의 테두리 출력*/
@@ -63,13 +75,24 @@ void setBlockList(TYPE* pList) {		// 블럭 리스트를 최초 초기화 및 블럭 리스트의 
 }
 
 void addBlockList(TYPE* pList) {		// 블럭 리스트에 새로 추가.
-	pList[BLOCK_LIST_LEN - 1] = (TYPE)(rand() % 7 + 9);
+	if (pList[7] == NONE) {
+		for (int i = 7; i < 14; i++) {
+			pList[i] = (TYPE)(rand() % 7 + 9);
+			for (int j = i - 1; 7 <= j; j--) {
+				if (pList[i] == pList[j]) {
+					i--;
+					break;
+				}
+			}
+		}
+	}
 }
 
 TYPE popBlockList(TYPE* pList) {		// 블럭 리스트에서 0번째 인덱스의 값을 리턴하고 삭제.
 	TYPE tmpBlockType = pList[0];
-	for (int i = 0; i < BLOCK_LIST_LEN - 1; i++) {
+	for (int i = 0; pList[i + 1] != NONE && i < 13; i++) {
 		pList[i] = pList[i + 1];
+		pList[i + 1] = (TYPE)NONE;
 	}
 	return tmpBlockType;
 }
@@ -80,7 +103,7 @@ void printBlockList(TYPE* pList) {		// 블럭 리스트 출력
 	int nowY = 2;
 	const int startX = 13;
 
-	for (int i = 0; i < BLOCK_LIST_LEN; i++) {		// pList의 크기만큼 반복
+	for (int i = 0; i < BLOCK_LIST_LEN; i++) {		// 블럭 리스트 길이만큼 반복
 
 		switch (pList[i]) {
 		case BLOCK_O:
@@ -159,6 +182,7 @@ void setBlock(BLOCK* pBlock, TYPE* pList) {		// 블럭 의 속성값 초기화.
 	setPoint(point, 2 * 3, -1);	// 블럭의 중심점을 (2 * 3, -1)으로 초기화.
 
 	pBlock->blockType = popBlockList(pList);
+	addBlockList(pList);
 
 	// 하나의 블럭을 구성하는 4개의 작은 블럭들을 중심점 기준으로 좌표 초기화. 
 	switch (pBlock->blockType) {
@@ -263,17 +287,23 @@ void rotateBlockPoint(BLOCK* pBlock) { // 블럭을 회전시키는 함수.
 		int delta_y = point[i].y - point[0].y;
 		setPoint(&point[i], point[0].x - delta_y, point[0].y + delta_x);
 	}
+}
 
-	int deltaX = getDeltaXfromSide(pBlock);
+void rotateBlock(BLOCK* pBlock) {
+	int deltaX;
+
+	removeBlock(pBlock);
+	rotateBlockPoint(pBlock);
+
+	/* 회전된 블럭이 맵 테두리와 충돌하지 않도록 조정*/
+	deltaX = getDeltaXfromSide(pBlock);
 	if (deltaX) {
 		/* 튀어나온 거리만큼 x좌표 변경 */
 		moveBlockPoint(pBlock, -deltaX, 0);
 	}
-}
 
-void rotateBlock(BLOCK* pBlock) {
-	removeBlock(pBlock);
-	rotateBlockPoint(pBlock);
+	/* 회전된 블럭이 다른 블럭과 충돌하지 않도록 조정 */
+
 	pBlock->deltaY = getDeltaY(pBlock);
 	putBlock(pBlock);
 }
@@ -386,10 +416,10 @@ int getDeltaXfromSide(BLOCK* pBlock) {
 		int X = pBlock->blockPoint[i].x;
 		int tmp;
 
-		if (X < 1) { // blockPoint[j]의 x좌표가 1보다 작을 때, x = 1을 기준으로 한 상대적 위치
+		if (X < 1) { // blockPoint[i]의 x좌표가 1보다 작을 때, x = 1을 기준으로 한 상대적 위치
 			tmp = X - 1;
 		}
-		else if (X > WIDTH - 2) { // blockPoint[j]의 x좌표가 WIDTH - 2보다 클 때, x = WIDTH - 2를 기준으로 한 상대적 위치
+		else if (X > WIDTH - 2) { // blockPoint[i]의 x좌표가 WIDTH - 2보다 클 때, x = WIDTH - 2를 기준으로 한 상대적 위치
 			tmp = X - (WIDTH - 2);
 		}
 		else { // blockPoint가 알맞은 위치에 있을 때.
