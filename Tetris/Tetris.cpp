@@ -20,12 +20,16 @@ void printMap() {		// 초기화된 맵 출력
 	gotoxy(0, 0);
 	for (int i = 0; i < HEIGHT; i++) {
 		for (int j = 0; j < WIDTH; j++) {
-			if (!i || map[i][j]) {
-				SET_BLOCK_COLOR(map_color[i][j]);
-				printf("■");
-			}
-			else {
+			SET_BLOCK_COLOR(map_color[i][j]);
+			switch (map_color[i][j]) {
+			case NONE :			// 빈 공간일 경우
 				printf("  ");
+				break;
+			case DEFAULT :		// 맵 테두리일 경우
+				printf("▣");
+				break;
+			default :				// 그 외
+				printf("■");
 			}
 		}
 		printf("\n");
@@ -99,7 +103,7 @@ void printBlockList(TYPE* pList) {		// 블럭 리스트 출력
 	int nowY = 2;
 	const int startX = 13;
 
-	for (int i = 0; i < BLOCK_LIST_LEN; i++) {		// pList의 크기만큼 반복
+	for (int i = 0; i < BLOCK_LIST_LEN; i++) {		// 블럭 리스트 길이만큼 반복
 
 		switch (pList[i]) {
 		case BLOCK_O:
