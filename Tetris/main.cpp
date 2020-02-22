@@ -11,6 +11,7 @@ int main() {
 	srand((unsigned int)time(NULL));
 	system("mode con cols=80 lines=30");		// 프롬프트 창 크기 조절
 	setCursorView(false);
+	int nFrame;
 
 	setMap();
 	printMap();
@@ -36,14 +37,16 @@ int main() {
 			break;
 		}
 
+		nFrame = FRAME_PER_SEC;
+
 		/* 블럭 드랍 */
-		while (0 < block.deltaY) {		// 블록이 맵 바닥까지 떨어질 때까지 반복
+
+		while (1) {
 			gotoxy(17, 27);
 			SET_BLOCK_COLOR(DEFAULT);
-			printf("%03d", block.nFrame);
+			printf("%03d", nFrame);
 
 			/* 키보드 입력받는 부분 */
-			
 			bool up, down, left, right, space;
 			getKey(&up, &down, &left, &right, &space);
 
@@ -51,8 +54,10 @@ int main() {
 				rotateBlock(&block);
 			}
 			if (down) {
+				if (!block.deltaY)
+					break;
 				moveBlock(&block, 0, 1);
-				block.nFrame = FRAME_PER_SEC;
+				nFrame = FRAME_PER_SEC;
 			}
 			if (left) {
 				if (!isBlocked(&block, -1))
@@ -69,16 +74,21 @@ int main() {
 
 			/* 키보드 입력받는 부분 끝*/
 
-			if (block.nFrame <= 0) {
-				moveBlock(&block, 0, 1);
-				gotoxy(17, 27);
-				block.nFrame = FRAME_PER_SEC;
-				SET_BLOCK_COLOR(DEFAULT);
-				printf("%03d", block.nFrame);
+			// nFrame과 deltaY가 모두 0이면 break.
+			if (nFrame) nFrame--;
+			else {
+				if (block.deltaY) {
+					moveBlock(&block, 0, 1);
+					gotoxy(17, 27);
+					nFrame = FRAME_PER_SEC;
+					SET_BLOCK_COLOR(DEFAULT);
+					printf("%03d", nFrame);
+				}
+				else
+					break;
 			}
 
 			gotoxy(0, 0);
-			block.nFrame--;
 			Sleep(1000 / FRAME_PER_SEC);
 		}
 
@@ -89,7 +99,6 @@ int main() {
 		}
 		/* 없어지는 줄 있는지 검사 */
 		clearLine(&block);
-		
 	}
 
 	gotoxy(2 * 25, 12);
@@ -97,11 +106,8 @@ int main() {
 	printf("GAME OVER!");
 	gotoxy(2 * 25, 13);
 	printf(("press ESC to exit"));
-	while (1) {
-		if(GetAsyncKeyState(VK_ESCAPE) & 0x8000){
-			break;
-		}
-	}
+
+	while (_getch() != VK_ESCAPE);
 	gotoxy(0, 28);
 	return 0;
 }

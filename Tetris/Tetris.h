@@ -40,7 +40,6 @@ typedef struct {
 	TYPE blockType;
 	POINT blockPoint[4];			// 배열의 첫 요소가 기준점.
 	int deltaY;						// 바닥으로부터 떨어진 거리.
-	short nFrame = 0;				// 떨어지는 속도.
 } BLOCK;
 
 void setMap(void);
