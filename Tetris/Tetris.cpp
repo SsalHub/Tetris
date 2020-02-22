@@ -104,7 +104,6 @@ void printBlockList(TYPE* pList) {		// 블럭 리스트 출력
 	const int startX = 13;
 
 	for (int i = 0; i < BLOCK_LIST_LEN; i++) {		// 블럭 리스트 길이만큼 반복
-
 		switch (pList[i]) {
 		case BLOCK_O:
 			setPoint(&point[0], -1, 0);
@@ -185,41 +184,45 @@ void setBlock(BLOCK* pBlock, TYPE* pList) {		// 블럭 의 속성값 초기화.
 	addBlockList(pList);
 
 	// 하나의 블럭을 구성하는 4개의 작은 블럭들을 중심점 기준으로 좌표 초기화. 
+
+	int x = point[0].x;
+	int y = point[0].y;
+
 	switch (pBlock->blockType) {
 	case BLOCK_O:
-		setPoint(&point[1], point->x - 1, point->y);
-		setPoint(&point[2], point->x - 1, point->y - 1);
-		setPoint(&point[3], point->x, point->y - 1);
+		setPoint(&point[1], x - 1, y);
+		setPoint(&point[2], x - 1, y - 1);
+		setPoint(&point[3], x, y - 1);
 		break;
 	case BLOCK_I:
-		setPoint(&point[1], point->x + 1, point->y);
-		setPoint(&point[2], point->x - 1, point->y);
-		setPoint(&point[3], point->x - 2, point->y);
+		setPoint(&point[1], x + 1, y);
+		setPoint(&point[2], x - 1, y);
+		setPoint(&point[3], x - 2, y);
 		break;
 	case BLOCK_Z:
-		setPoint(&point[1], point->x, point->y + 1);
-		setPoint(&point[2], point->x - 1, point->y);
-		setPoint(&point[3], point->x - 1, point->y - 1);
+		setPoint(&point[1], x, y + 1);
+		setPoint(&point[2], x - 1, y);
+		setPoint(&point[3], x - 1, y - 1);
 		break;
 	case BLOCK_S:
-		setPoint(&point[1], point->x - 1, point->y + 1);
-		setPoint(&point[2], point->x - 1, point->y);
-		setPoint(&point[3], point->x, point->y - 1);
+		setPoint(&point[1], x - 1, y + 1);
+		setPoint(&point[2], x - 1, y);
+		setPoint(&point[3], x, y - 1);
 		break;
 	case BLOCK_J:
-		setPoint(&point[1], point->x - 1, point->y);
-		setPoint(&point[2], point->x - 2, point->y);
-		setPoint(&point[3], point->x, point->y - 1);
+		setPoint(&point[1], x - 1, y);
+		setPoint(&point[2], x - 2, y);
+		setPoint(&point[3], x, y - 1);
 		break;
 	case BLOCK_L:
-		setPoint(&point[1], point->x, point->y + 1);
-		setPoint(&point[2], point->x - 1, point->y);
-		setPoint(&point[3], point->x - 2, point->y);
+		setPoint(&point[1], x, y + 1);
+		setPoint(&point[2], x - 1, y);
+		setPoint(&point[3], x - 2, y);
 		break;
 	case BLOCK_T:
-		setPoint(&point[1], point->x, point->y + 1);
-		setPoint(&point[2], point->x - 1, point->y);
-		setPoint(&point[3], point->x, point->y - 1);
+		setPoint(&point[1], x, y + 1);
+		setPoint(&point[2], x - 1, y);
+		setPoint(&point[3], x, y - 1);
 		break;
 	}
 
@@ -323,7 +326,6 @@ void putBlock(BLOCK* pBlock) { // 저장된 좌표로 이동하여 블럭을 출력함.
 	SET_BLOCK_COLOR(pBlock->blockType);
 
 	const POINT* point = pBlock->blockPoint;
-	//putBlockPrev(pBlock);
 	for (int i = 0; i < BLOCK_SIZE; i++) {
 		if (0 < point[i].y) {
 			gotoxy(2 * point[i].x, point[i].y);
@@ -345,8 +347,6 @@ void putBlockPrev(BLOCK* pBlock) {		// 드랍 중인 블록의 미리보기 출력.
 }
 
 void removeBlock(BLOCK* pBlock) {		// 출력된 블럭의 좌표에 공백을 덮어씌워 지운다.
-	//removeBlockPrev(pBlock);		// 미리보기 블럭 제거
-
 	const POINT* point = pBlock->blockPoint;
 	for (int i = 0; i < BLOCK_SIZE; i++) {
 		if (0 < point[i].y) {   // map 안에 있을 때만
@@ -358,7 +358,6 @@ void removeBlock(BLOCK* pBlock) {		// 출력된 블럭의 좌표에 공백을 덮어씌워 지운�
 
 void removeBlockPrev(BLOCK* pBlock) {		// 미리보기 위에 공백을 출력하여 덮어씌움.
 	POINT* point = pBlock->blockPoint;
-
 	for (int i = 0; i < BLOCK_SIZE; i++) {
 		if (0 < point[i].y + pBlock->deltaY) {
 			gotoxy(2 * point[i].x, point[i].y + pBlock->deltaY);
@@ -455,19 +454,21 @@ int getDeltaXfromSide(BLOCK* pBlock) {
 }
 
 int getBlockLowestY(BLOCK* pBlock) {		// 블럭에서 가장 낮은 높이값을 리턴
-	int lowestY = pBlock->blockPoint[0].y;
+	POINT* point = pBlock->blockPoint;
 
+	int lowestY = point[0].y;
 	for (int i = 0; i < BLOCK_SIZE - 1; i++) {
-		lowestY = GET_MAX(lowestY, pBlock->blockPoint[i + 1].y);
+		lowestY = GET_MAX(lowestY, point[i + 1].y);
 	}
 	return lowestY;
 }
 
 int getBlockHighestY(BLOCK* pBlock) {		// 블럭에서 가장 높은 높이값을 리턴
-	int highestY = pBlock->blockPoint[0].y;
+	POINT* point = pBlock->blockPoint;
 
+	int highestY = point[0].y;
 	for (int i = 0; i < BLOCK_SIZE - 1; i++) {
-		highestY = GET_MIN(highestY, pBlock->blockPoint[i + 1].y);
+		highestY = GET_MIN(highestY, point[i + 1].y);
 	}
 	return highestY;
 }
