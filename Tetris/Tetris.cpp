@@ -46,7 +46,7 @@ void setBlockList(TYPE* pList) {		// 블럭 리스트를 최초 초기화 및 블럭 리스트의 
 	const int startY = 0;
 
 	/* 블럭 리스트 초기화 */
-	for (int i = 0; i < 2; i++) {	
+	for (int i = 0; i < 2; i++) {
 		for (int j = 7 * i; j < 7 * (i + 1); j++) {
 			pList[j] = (TYPE)(rand() % 7 + 9);
 			for (int k = j - 1; 7 * i <= k; k--) {
@@ -268,9 +268,11 @@ void moveBlockPoint(BLOCK* pBlock, int x, int y) { // 블럭의 모든 점의 좌표를 (x
 }
 
 void moveBlock(BLOCK* pBlock, int x, int y) {
+	if (x) removeBlockPrev(pBlock);
 	removeBlock(pBlock);
 	moveBlockPoint(pBlock, x, y);
 	pBlock->deltaY = getDeltaY(pBlock);
+	if (x) putBlockPrev(pBlock);
 	putBlock(pBlock);
 }
 
@@ -292,6 +294,7 @@ void rotateBlockPoint(BLOCK* pBlock) { // 블럭을 회전시키는 함수.
 void rotateBlock(BLOCK* pBlock) {
 	int deltaX;
 
+	removeBlockPrev(pBlock);
 	removeBlock(pBlock);
 	rotateBlockPoint(pBlock);
 
@@ -305,12 +308,13 @@ void rotateBlock(BLOCK* pBlock) {
 	/* 회전된 블럭이 다른 블럭과 충돌하지 않도록 조정 */
 
 	pBlock->deltaY = getDeltaY(pBlock);
+	putBlockPrev(pBlock);
 	putBlock(pBlock);
 }
 
 void putBlock(BLOCK* pBlock) { // 저장된 좌표로 이동하여 블럭을 출력함.
 	SET_BLOCK_COLOR(pBlock->blockType);
-	putBlockPrev(pBlock);
+	//putBlockPrev(pBlock);
 	for (int i = 0; i < BLOCK_SIZE; i++) {
 		if (0 < pBlock->blockPoint[i].y) {
 			gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y);
@@ -320,6 +324,7 @@ void putBlock(BLOCK* pBlock) { // 저장된 좌표로 이동하여 블럭을 출력함.
 }
 
 void putBlockPrev(BLOCK* pBlock) {		// 드랍 중인 블록의 미리보기 출력.
+	SET_BLOCK_COLOR(pBlock->blockType);
 	for (int i = 0; i < BLOCK_SIZE; i++) {
 		if (0 < pBlock->blockPoint[i].y + pBlock->deltaY) {
 			gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y + pBlock->deltaY);
@@ -329,7 +334,7 @@ void putBlockPrev(BLOCK* pBlock) {		// 드랍 중인 블록의 미리보기 출력.
 }
 
 void removeBlock(BLOCK* pBlock) {		// 출력된 블럭의 좌표에 공백을 덮어씌워 지운다.
-	removeBlockPrev(pBlock);		// 미리보기 블럭 제거
+	//removeBlockPrev(pBlock);		// 미리보기 블럭 제거
 	for (int i = 0; i < BLOCK_SIZE; i++) {
 		if (0 < pBlock->blockPoint[i].y) {   // map 안에 있을 때만
 			gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y);
