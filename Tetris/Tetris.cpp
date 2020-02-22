@@ -46,8 +46,16 @@ void setBlockList(TYPE* pList) {		// 블럭 리스트를 최초 초기화 및 블럭 리스트의 
 	const int startY = 0;
 
 	/* 블럭 리스트 초기화 */
-	for (int i = 0; i < BLOCK_LIST_LEN; i++) {
-		pList[i] = (TYPE)(rand() % 7 + 9);
+	for (int i = 0; i < 2; i++) {
+		for (int j = 7 * i; j < 7 * (i + 1); j++) {
+			pList[j] = (TYPE)(rand() % 7 + 9);
+			for (int k = j - 1; 7 * i <= k; k--) {
+				if (pList[j] == pList[k]) {
+					j--;
+					break;
+				}
+			}
+		}
 	}
 
 	/* 블럭 리스트의 테두리 출력*/
@@ -67,13 +75,24 @@ void setBlockList(TYPE* pList) {		// 블럭 리스트를 최초 초기화 및 블럭 리스트의 
 }
 
 void addBlockList(TYPE* pList) {		// 블럭 리스트에 새로 추가.
-	pList[BLOCK_LIST_LEN - 1] = (TYPE)(rand() % 7 + 9);
+	if (pList[7] == NONE) {
+		for (int i = 7; i < 14; i++) {
+			pList[i] = (TYPE)(rand() % 7 + 9);
+			for (int j = i - 1; 7 <= j; j--) {
+				if (pList[i] == pList[j]) {
+					i--;
+					break;
+				}
+			}
+		}
+	}
 }
 
 TYPE popBlockList(TYPE* pList) {		// 블럭 리스트에서 0번째 인덱스의 값을 리턴하고 삭제.
 	TYPE tmpBlockType = pList[0];
-	for (int i = 0; i < BLOCK_LIST_LEN - 1; i++) {
+	for (int i = 0; pList[i + 1] != NONE && i < 13; i++) {
 		pList[i] = pList[i + 1];
+		pList[i + 1] = (TYPE)NONE;
 	}
 	return tmpBlockType;
 }
@@ -84,7 +103,7 @@ void printBlockList(TYPE* pList) {		// 블럭 리스트 출력
 	int nowY = 2;
 	const int startX = 13;
 
-	for (int i = 0; i < BLOCK_LIST_LEN; i++) {		// pList의 크기만큼 반복
+	for (int i = 0; i < BLOCK_LIST_LEN; i++) {		// 블럭 리스트 길이만큼 반복
 
 		switch (pList[i]) {
 		case BLOCK_O:
@@ -163,6 +182,7 @@ void setBlock(BLOCK* pBlock, TYPE* pList) {		// 블럭 의 속성값 초기화.
 	setPoint(point, 2 * 3, -1);	// 블럭의 중심점을 (2 * 3, -1)으로 초기화.
 
 	pBlock->blockType = popBlockList(pList);
+	addBlockList(pList);
 
 	// 하나의 블럭을 구성하는 4개의 작은 블럭들을 중심점 기준으로 좌표 초기화. 
 	switch (pBlock->blockType) {
@@ -248,9 +268,11 @@ void moveBlockPoint(BLOCK* pBlock, int x, int y) { // 블럭의 모든 점의 좌표를 (x
 }
 
 void moveBlock(BLOCK* pBlock, int x, int y) {
+	if (x) removeBlockPrev(pBlock);
 	removeBlock(pBlock);
 	moveBlockPoint(pBlock, x, y);
 	pBlock->deltaY = getDeltaY(pBlock);
+	if (x) putBlockPrev(pBlock);
 	putBlock(pBlock);
 }
 
@@ -267,24 +289,32 @@ void rotateBlockPoint(BLOCK* pBlock) { // 블럭을 회전시키는 함수.
 		int delta_y = point[i].y - point[0].y;
 		setPoint(&point[i], point[0].x - delta_y, point[0].y + delta_x);
 	}
+}
 
-	int deltaX = getDeltaXfromSide(pBlock);
+void rotateBlock(BLOCK* pBlock) {
+	int deltaX;
+
+	removeBlockPrev(pBlock);
+	removeBlock(pBlock);
+	rotateBlockPoint(pBlock);
+
+	/* 회전된 블럭이 맵 테두리와 충돌하지 않도록 조정*/
+	deltaX = getDeltaXfromSide(pBlock);
 	if (deltaX) {
 		/* 튀어나온 거리만큼 x좌표 변경 */
 		moveBlockPoint(pBlock, -deltaX, 0);
 	}
-}
 
-void rotateBlock(BLOCK* pBlock) {
-	removeBlock(pBlock);
-	rotateBlockPoint(pBlock);
+	/* 회전된 블럭이 다른 블럭과 충돌하지 않도록 조정 */
+
 	pBlock->deltaY = getDeltaY(pBlock);
+	putBlockPrev(pBlock);
 	putBlock(pBlock);
 }
 
 void putBlock(BLOCK* pBlock) { // 저장된 좌표로 이동하여 블럭을 출력함.
 	SET_BLOCK_COLOR(pBlock->blockType);
-	putBlockPrev(pBlock);
+	//putBlockPrev(pBlock);
 	for (int i = 0; i < BLOCK_SIZE; i++) {
 		if (0 < pBlock->blockPoint[i].y) {
 			gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y);
@@ -294,6 +324,7 @@ void putBlock(BLOCK* pBlock) { // 저장된 좌표로 이동하여 블럭을 출력함.
 }
 
 void putBlockPrev(BLOCK* pBlock) {		// 드랍 중인 블록의 미리보기 출력.
+	SET_BLOCK_COLOR(pBlock->blockType);
 	for (int i = 0; i < BLOCK_SIZE; i++) {
 		if (0 < pBlock->blockPoint[i].y + pBlock->deltaY) {
 			gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y + pBlock->deltaY);
@@ -303,7 +334,7 @@ void putBlockPrev(BLOCK* pBlock) {		// 드랍 중인 블록의 미리보기 출력.
 }
 
 void removeBlock(BLOCK* pBlock) {		// 출력된 블럭의 좌표에 공백을 덮어씌워 지운다.
-	removeBlockPrev(pBlock);		// 미리보기 블럭 제거
+	//removeBlockPrev(pBlock);		// 미리보기 블럭 제거
 	for (int i = 0; i < BLOCK_SIZE; i++) {
 		if (0 < pBlock->blockPoint[i].y) {   // map 안에 있을 때만
 			gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y);

@@ -11,12 +11,13 @@ int main() {
 	srand((unsigned int)time(NULL));
 	system("mode con cols=80 lines=30");		// 프롬프트 창 크기 조절
 	setCursorView(false);
+	int nFrame;
 
 	setMap();
 	printMap();
 
-	TYPE blockList[BLOCK_LIST_LEN];		// 블럭 리스트
-	//TYPE newBlock;		// 리스트에서 첫번째 값을 뽑아와서 임시로 저장하는 변수
+	TYPE blockList[14];		// 블럭 리스트
+	TYPE newBlock;		// 리스트에서 첫번째 값을 뽑아와서 임시로 저장하는 변수
 	setBlockList(blockList);
 
 	BLOCK block;
@@ -27,8 +28,7 @@ int main() {
 		/* 블럭 생성 */
 		setBlock(&block, blockList);
 
-		/* 블럭 리스트에 새 블럭 추가 및 출력*/
-		addBlockList(blockList);
+		/* 블럭 리스트 출력*/
 		clearBlockList();
 		printBlockList(blockList);
 
@@ -37,9 +37,12 @@ int main() {
 			break;
 		}
 
-		int nFrame = FRAME_PER_SEC;
+		nFrame = FRAME_PER_SEC;
 
 		/* 블럭 드랍 */
+
+		putBlockPrev(&block);
+		putBlock(&block);
 
 		while (1) {
 			gotoxy(17, 27);
@@ -74,7 +77,6 @@ int main() {
 
 			/* 키보드 입력받는 부분 끝*/
 
-
 			// nFrame과 deltaY가 모두 0이면 break.
 			if (nFrame) nFrame--;
 			else {
@@ -82,6 +84,8 @@ int main() {
 					moveBlock(&block, 0, 1);
 					gotoxy(17, 27);
 					nFrame = FRAME_PER_SEC;
+					SET_BLOCK_COLOR(DEFAULT);
+					printf("%03d", nFrame);
 				}
 				else
 					break;
@@ -98,7 +102,6 @@ int main() {
 		}
 		/* 없어지는 줄 있는지 검사 */
 		clearLine(&block);
-
 	}
 
 	gotoxy(2 * 25, 12);
@@ -106,6 +109,7 @@ int main() {
 	printf("GAME OVER!");
 	gotoxy(2 * 25, 13);
 	printf(("press ESC to exit"));
+
 	while (_getch() != VK_ESCAPE);
 	gotoxy(0, 28);
 	return 0;
