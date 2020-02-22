@@ -129,7 +129,7 @@ void printBlockList(TYPE* pList) {		// 블럭 리스트 출력
 			break;
 		case BLOCK_S:
 			setPoint(&point[0], 0, 0);
-			setPoint(&point[1], point->x , point->y + 1);
+			setPoint(&point[1], point->x, point->y + 1);
 			setPoint(&point[2], point->x - 1, point->y + 1);
 			setPoint(&point[3], point->x - 1, point->y + 2);
 			blockHeight = 3;
@@ -152,7 +152,7 @@ void printBlockList(TYPE* pList) {		// 블럭 리스트 출력
 			setPoint(&point[0], 0, 0);
 			setPoint(&point[1], point->x - 1, point->y + 1);
 			setPoint(&point[2], point->x, point->y + 1);
-			setPoint(&point[3], point->x + 1, point->y  + 1);
+			setPoint(&point[3], point->x + 1, point->y + 1);
 			blockHeight = 2;
 			break;
 		}
@@ -416,10 +416,10 @@ int getDeltaXfromSide(BLOCK* pBlock) {
 		int X = pBlock->blockPoint[i].x;
 		int tmp;
 
-		if (X < 1) { // blockPoint[i]의 x좌표가 1보다 작을 때, x = 1을 기준으로 한 상대적 위치
+		if (X < 1) { // blockPoint[j]의 x좌표가 1보다 작을 때, x = 1을 기준으로 한 상대적 위치
 			tmp = X - 1;
 		}
-		else if (X > WIDTH - 2) { // blockPoint[i]의 x좌표가 WIDTH - 2보다 클 때, x = WIDTH - 2를 기준으로 한 상대적 위치
+		else if (X > WIDTH - 2) { // blockPoint[j]의 x좌표가 WIDTH - 2보다 클 때, x = WIDTH - 2를 기준으로 한 상대적 위치
 			tmp = X - (WIDTH - 2);
 		}
 		else { // blockPoint가 알맞은 위치에 있을 때.
