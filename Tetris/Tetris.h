@@ -54,7 +54,7 @@ void clearBlockList();
 void setBlock(BLOCK* pBlock, TYPE* pList);
 bool pressed(int key);
 void getKey(bool*, bool*, bool*, bool*, bool*);
-bool isBlocked(const BLOCK* pBlock, int x);
+bool isBlocked(BLOCK* pBlock, int x);
 void moveBlockPoint(BLOCK* pBlock, int x, int y);
 void moveBlock(BLOCK* pBlock, int x, int y);
 void putBlock(BLOCK* pBlock);

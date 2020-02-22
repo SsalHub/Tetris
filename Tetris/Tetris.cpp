@@ -247,13 +247,14 @@ void getKey(bool* up, bool* down, bool* left, bool* right, bool* space) {
 			key_nFrame[i] = 0;
 }
 
-bool isBlocked(const BLOCK* pBlock, int x) {
+bool isBlocked(BLOCK* pBlock, int x) {
+	const POINT* point = pBlock->blockPoint;
+
 	int y;
-
 	for (int i = 0; i < BLOCK_SIZE; i++) {
-		y = pBlock->blockPoint[i].y < 0 ? 0 : pBlock->blockPoint[i].y;
+		y = point[i].y < 0 ? 0 : point[i].y;
 
-		if (map[y][pBlock->blockPoint[i].x + x] == 1) {
+		if (map[y][point[i].x + x] == 1) {
 			return true;
 		}
 	}
@@ -261,13 +262,17 @@ bool isBlocked(const BLOCK* pBlock, int x) {
 }
 
 void moveBlockPoint(BLOCK* pBlock, int x, int y) { // 블럭의 모든 점의 좌표를 (x, nowY)만큼 옮긴다.
+	POINT* point = pBlock->blockPoint;
 	for (int i = 0; i < BLOCK_SIZE; i++) {
-		pBlock->blockPoint[i].x += x;
-		pBlock->blockPoint[i].y += y;
+		point[i].x += x;
+		point[i].y += y;
 	}
 }
 
 void moveBlock(BLOCK* pBlock, int x, int y) {
+	if (x == 0 && y == 0)
+		return;
+
 	if (x) removeBlockPrev(pBlock);
 	removeBlock(pBlock);
 	moveBlockPoint(pBlock, x, y);
@@ -292,13 +297,15 @@ void rotateBlockPoint(BLOCK* pBlock) { // 블럭을 회전시키는 함수.
 }
 
 void rotateBlock(BLOCK* pBlock) {
-	int deltaX;
+	POINT* point = pBlock->blockPoint;
 
 	removeBlockPrev(pBlock);
 	removeBlock(pBlock);
 	rotateBlockPoint(pBlock);
 
+
 	/* 회전된 블럭이 맵 테두리와 충돌하지 않도록 조정*/
+	int deltaX;
 	deltaX = getDeltaXfromSide(pBlock);
 	if (deltaX) {
 		/* 튀어나온 거리만큼 x좌표 변경 */
@@ -314,10 +321,12 @@ void rotateBlock(BLOCK* pBlock) {
 
 void putBlock(BLOCK* pBlock) { // 저장된 좌표로 이동하여 블럭을 출력함.
 	SET_BLOCK_COLOR(pBlock->blockType);
+
+	const POINT* point = pBlock->blockPoint;
 	//putBlockPrev(pBlock);
 	for (int i = 0; i < BLOCK_SIZE; i++) {
-		if (0 < pBlock->blockPoint[i].y) {
-			gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y);
+		if (0 < point[i].y) {
+			gotoxy(2 * point[i].x, point[i].y);
 			printf("■");
 		}
 	}
@@ -325,9 +334,11 @@ void putBlock(BLOCK* pBlock) { // 저장된 좌표로 이동하여 블럭을 출력함.
 
 void putBlockPrev(BLOCK* pBlock) {		// 드랍 중인 블록의 미리보기 출력.
 	SET_BLOCK_COLOR(pBlock->blockType);
+
+	const POINT* point = pBlock->blockPoint;
 	for (int i = 0; i < BLOCK_SIZE; i++) {
-		if (0 < pBlock->blockPoint[i].y + pBlock->deltaY) {
-			gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y + pBlock->deltaY);
+		if (0 < point[i].y + pBlock->deltaY) {
+			gotoxy(2 * point[i].x, point[i].y + pBlock->deltaY);
 			printf("□");
 		}
 	}
@@ -335,18 +346,22 @@ void putBlockPrev(BLOCK* pBlock) {		// 드랍 중인 블록의 미리보기 출력.
 
 void removeBlock(BLOCK* pBlock) {		// 출력된 블럭의 좌표에 공백을 덮어씌워 지운다.
 	//removeBlockPrev(pBlock);		// 미리보기 블럭 제거
+
+	const POINT* point = pBlock->blockPoint;
 	for (int i = 0; i < BLOCK_SIZE; i++) {
-		if (0 < pBlock->blockPoint[i].y) {   // map 안에 있을 때만
-			gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y);
+		if (0 < point[i].y) {   // map 안에 있을 때만
+			gotoxy(2 * point[i].x, point[i].y);
 			printf("  ");	// 기존의 ■를 지우기 위해 공백 출력
 		}
 	}
 }
 
 void removeBlockPrev(BLOCK* pBlock) {		// 미리보기 위에 공백을 출력하여 덮어씌움.
+	POINT* point = pBlock->blockPoint;
+
 	for (int i = 0; i < BLOCK_SIZE; i++) {
-		if (0 < pBlock->blockPoint[i].y + pBlock->deltaY) {
-			gotoxy(2 * pBlock->blockPoint[i].x, pBlock->blockPoint[i].y + pBlock->deltaY);
+		if (0 < point[i].y + pBlock->deltaY) {
+			gotoxy(2 * point[i].x, point[i].y + pBlock->deltaY);
 			printf("  ");
 		}
 	}
@@ -401,12 +416,13 @@ bool isCleared(int line_y) {		// 해당 라인이 클리어됐다면 true
 }
 
 int getDeltaY(BLOCK* pBlock) {	// 떨어지는 블럭과 바닥 간의 거리를 리턴하는 함수.
-	int deltaY = HEIGHT;		// 떨어지는 블럭과 바닥간의 거리를 저장. 최종적으로 최솟값을 얻는 것이 목표이므로 최댓값으로 초기화
+	POINT* point = pBlock->blockPoint;
 
+	int deltaY = HEIGHT;		// 떨어지는 블럭과 바닥간의 거리를 저장. 최종적으로 최솟값을 얻는 것이 목표이므로 최댓값으로 초기화
 	for (int i = 0; i < BLOCK_SIZE; i++) {
-		for (int j = pBlock->blockPoint[i].y; j < HEIGHT - 1; j++) {		// map의 맨 위부터 블록이 쌓여있는 위치를 탐색
-			if (map[j + 1][pBlock->blockPoint[i].x]) {		// 쌓여있는 위치를 찾았다면 
-				deltaY = GET_MIN(deltaY, j - pBlock->blockPoint[i].y);		// 현재 바닥의 y좌표 - 떨어지는 블럭의 y좌표 
+		for (int j = point[i].y; j < HEIGHT - 1; j++) {		// map의 맨 위부터 블록이 쌓여있는 위치를 탐색
+			if (map[j + 1][point[i].x]) {		// 쌓여있는 위치를 찾았다면 
+				deltaY = GET_MIN(deltaY, j - point[i].y);		// 현재 바닥의 y좌표 - 떨어지는 블럭의 y좌표 
 				break;
 			}
 		}
