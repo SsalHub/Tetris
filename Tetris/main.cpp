@@ -27,7 +27,7 @@ int main() {
 	while (1) {	// 게임 오버까지
 		/* 블럭 생성 */
 		setBlock(&block, blockList);
-		
+
 		/* 블럭 리스트 출력*/
 		clearBlockList();
 		printBlockList(blockList);
@@ -40,6 +40,9 @@ int main() {
 		nFrame = FRAME_PER_SEC;
 
 		/* 블럭 드랍 */
+
+		putBlockPrev(&block);
+		putBlock(&block);
 
 		while (1) {
 			gotoxy(17, 27);
