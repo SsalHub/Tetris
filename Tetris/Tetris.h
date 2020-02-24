@@ -24,8 +24,10 @@
 #define KEY_SPACE 32
 #define KEY_COUNT 5
 
+
 #define GET_MAX(n1, n2) ((n1) > (n2) ? (n1) : (n2))		// 더 큰 수를 계산하는 매크로 함수
 #define GET_MIN(n1, n2) ((n1) < (n2) ? (n1) : (n2))		// 더 작은 수를 계산하는 매크로 함수
+#define GET_ABS_MAX(n1, n2) ((abs(n1)) > (abs(n2)) ? (n1) : (n2))
 #define SET_BLOCK_COLOR(n) SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (n))
 
 typedef enum {
@@ -46,6 +48,7 @@ typedef struct {
 void setMap(void);
 void printMap(void);
 void setPoint(POINT* pPoint, int x, int y);
+void pointCopy(POINT* dst, const POINT* src);
 void setBlockList(TYPE* pList);
 void addBlockList(TYPE* pList);
 TYPE popBlockList(TYPE* pList);
@@ -54,19 +57,22 @@ void clearBlockList();
 void setBlock(BLOCK* pBlock, TYPE* pList);
 bool pressed(int key);
 void getKey(bool*, bool*, bool*, bool*, bool*);
-bool isBlocked(BLOCK* pBlock, int x);
-void moveBlockPoint(BLOCK* pBlock, int x, int y);
+void moveBlockPoint(POINT* pPoint, int x, int y);
 void moveBlock(BLOCK* pBlock, int x, int y);
 void putBlock(BLOCK* pBlock);
 void putBlockPrev(BLOCK* pBlock);
 void removeBlock(BLOCK* pBlock);
 void removeBlockPrev(BLOCK* pBlock);
-void rotateBlockPoint(BLOCK* pBlock);
+void rotateBlockPoint(POINT* pPoint);
 void rotateBlock(BLOCK* pBlock);
 void clearLine(BLOCK* pBlock);
 void resetLine(int line_y);
 void dropLine(int line_y, int clear_line_cnt);
 bool isCleared(int line_y);
+bool sideBlocked(BLOCK* pBlock, int x);
+bool isBlocked(const POINT* pPoint);
+bool isPointBlocked(const POINT* pPoint);
+bool isInsideMap(const POINT* pPoint);
 int getDeltaY(BLOCK* pBlock);
 int getDeltaXfromSide(BLOCK* pBlock);
 int getBlockLowestY(BLOCK* pBlock);

@@ -63,11 +63,11 @@ int main() {
 				nFrame = FRAME_PER_SEC;
 			}
 			if (left) {
-				if (!isBlocked(&block, -1))
+				if (!sideBlocked(&block, -1))
 					moveBlock(&block, -1, 0);
 			}
 			else if (right) {
-				if (!isBlocked(&block, 1))
+				if (!sideBlocked(&block, 1))
 					moveBlock(&block, 1, 0);
 			}
 			if (space) {
