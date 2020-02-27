@@ -441,7 +441,7 @@ bool isPointBlocked(const POINT* pPoint) {
 }
 
 bool isInsideMap(const POINT* pPoint) {
-	return (0 < pPoint->x && pPoint->x < WIDTH - 1) && (0 < pPoint->y && pPoint->y < HEIGHT - 1);
+	return (0 < pPoint->x && pPoint->x < WIDTH - 1) && (pPoint->y < HEIGHT - 1);
 }
 
 int getDeltaY(BLOCK* pBlock) {	// 떨어지는 블럭과 바닥 간의 거리를 리턴하는 함수.
