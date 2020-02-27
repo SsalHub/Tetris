@@ -41,6 +41,11 @@ void setPoint(POINT* pPoint, int x, int y) {		// 블럭의 x, y좌표 값을 입력받은 �
 	pPoint->y = y;
 }
 
+void pointCopy(POINT* dst, const POINT* src) {
+	for (int i = 0; i < BLOCK_SIZE; i++)
+		dst[i] = src[i];
+}
+
 void setBlockList(TYPE* pList) {		// 블럭 리스트를 최초 초기화 및 블럭 리스트의 테두리 출력.
 	const int startX = 12;
 	const int startY = 0;
@@ -250,76 +255,70 @@ void getKey(bool* up, bool* down, bool* left, bool* right, bool* space) {
 			key_nFrame[i] = 0;
 }
 
-bool isBlocked(BLOCK* pBlock, int x) {
-	const POINT* point = pBlock->blockPoint;
+void moveBlockPoint(POINT* pPoint, int x, int y) { // 블럭의 모든 점의 좌표를 (x, nowY)만큼 옮긴다.
+	if (x == 0 && y == 0) return;
 
-	int y;
 	for (int i = 0; i < BLOCK_SIZE; i++) {
-		y = point[i].y < 0 ? 0 : point[i].y;
-
-		if (map[y][point[i].x + x] == 1) {
-			return true;
-		}
-	}
-	return false;
-}
-
-void moveBlockPoint(BLOCK* pBlock, int x, int y) { // 블럭의 모든 점의 좌표를 (x, nowY)만큼 옮긴다.
-	POINT* point = pBlock->blockPoint;
-	for (int i = 0; i < BLOCK_SIZE; i++) {
-		point[i].x += x;
-		point[i].y += y;
+		pPoint[i].x += x;
+		pPoint[i].y += y;
 	}
 }
 
 void moveBlock(BLOCK* pBlock, int x, int y) {
-	if (x == 0 && y == 0)
-		return;
+	if (x == 0 && y == 0) return;
 
 	if (x) removeBlockPrev(pBlock);
 	removeBlock(pBlock);
-	moveBlockPoint(pBlock, x, y);
+
+	moveBlockPoint(pBlock->blockPoint, x, y);
 	pBlock->deltaY = getDeltaY(pBlock);
+
 	if (x) putBlockPrev(pBlock);
 	putBlock(pBlock);
 }
 
 
-void rotateBlockPoint(BLOCK* pBlock) { // 블럭을 회전시키는 함수.
-	POINT* point = pBlock->blockPoint;
-
-	if (pBlock->blockType == BLOCK_O) {
-		return;
-	}
-
+void rotateBlockPoint(POINT* pPoint) { // 블럭을 회전시키는 함수.
 	for (int i = 0; i < BLOCK_SIZE; i++) {
-		int delta_x = point[i].x - point[0].x;
-		int delta_y = point[i].y - point[0].y;
-		setPoint(&point[i], point[0].x - delta_y, point[0].y + delta_x);
+		int delta_x = pPoint[i].x - pPoint[0].x;
+		int delta_y = pPoint[i].y - pPoint[0].y;
+		setPoint(&pPoint[i], pPoint[0].x - delta_y, pPoint[0].y + delta_x);
 	}
 }
 
 void rotateBlock(BLOCK* pBlock) {
+	if (pBlock->blockType == BLOCK_O)
+		return;
+
 	POINT* point = pBlock->blockPoint;
+	POINT copy[4];
+	pointCopy(copy, point);
 
-	removeBlockPrev(pBlock);
-	removeBlock(pBlock);
-	rotateBlockPoint(pBlock);
+	rotateBlockPoint(copy);
 
-
-	/* 회전된 블럭이 맵 테두리와 충돌하지 않도록 조정*/
-	int deltaX;
-	deltaX = getDeltaXfromSide(pBlock);
-	if (deltaX) {
-		/* 튀어나온 거리만큼 x좌표 변경 */
-		moveBlockPoint(pBlock, -deltaX, 0);
+	int deltaX = 0, deltaY = 0;
+	for (int i = 1; i < BLOCK_SIZE; i++) {
+		// 겹치거나 맵 밖으로 벗어남.
+		if (isPointBlocked(&copy[i])) {
+			deltaX = GET_ABS_MAX(deltaX, copy[i].x - copy[0].x);
+			deltaY = GET_ABS_MAX(deltaY, copy[i].y - copy[0].y);
+		}
 	}
 
-	/* 회전된 블럭이 다른 블럭과 충돌하지 않도록 조정 */
+	moveBlockPoint(copy, -deltaX, -deltaY);
 
-	pBlock->deltaY = getDeltaY(pBlock);
-	putBlockPrev(pBlock);
-	putBlock(pBlock);
+	// 옮겨도 막혀 있으면 리턴.
+	if (isBlocked(copy)) return;
+	else { // 안 막혀 있으면 출력.
+		removeBlockPrev(pBlock);
+		removeBlock(pBlock);
+
+		pointCopy(point, copy);
+		pBlock->deltaY = getDeltaY(pBlock);
+
+		putBlockPrev(pBlock);
+		putBlock(pBlock);
+	}
 }
 
 void putBlock(BLOCK* pBlock) { // 저장된 좌표로 이동하여 블럭을 출력함.
@@ -412,6 +411,37 @@ bool isCleared(int line_y) {		// 해당 라인이 클리어됐다면 true
 		}
 	}
 	return true;
+}
+
+bool sideBlocked(BLOCK* pBlock, int x) {
+	const POINT* point = pBlock->blockPoint;
+
+	int y;
+	for (int i = 0; i < BLOCK_SIZE; i++) {
+		y = point[i].y < 0 ? 0 : point[i].y;
+
+		if (map[y][point[i].x + x] == 1) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool isBlocked(const POINT* pPoint) {
+	for (int i = 0; i < BLOCK_SIZE; i++) {
+		if (isPointBlocked(&pPoint[i])) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool isPointBlocked(const POINT* pPoint) {
+	return !isInsideMap(pPoint) || map[pPoint->y][pPoint->x];
+}
+
+bool isInsideMap(const POINT* pPoint) {
+	return (0 < pPoint->x && pPoint->x < WIDTH - 1) && (0 < pPoint->y && pPoint->y < HEIGHT - 1);
 }
 
 int getDeltaY(BLOCK* pBlock) {	// 떨어지는 블럭과 바닥 간의 거리를 리턴하는 함수.
